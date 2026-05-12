@@ -581,11 +581,27 @@ async function loadHistory() {
                 data.data.forEach(h => {
                     let icon = h.tx_type === 'DEPOSIT' || h.tx_type === 'REFUND' ? 'text-green-500' : 'text-red-500';
                     let statusColor = h.status === 'SUCCESS' ? 'text-green-400' : (h.status === 'PENDING' ? 'text-yellow-400' : 'text-red-400');
-                    c.innerHTML += `<div class="bg-black/60 p-3 rounded-xl border border-theme shadow-inner mb-3"><div class="flex justify-between items-center mb-1"><h4 class="font-bold text-sm ${icon}">${h.item_name}</h4><span class="text-xs font-bold text-white">Rp ${h.total_price.toLocaleString('id-ID')}</span></div><div class="flex justify-between items-center"><p class="text-[10px] text-theme-sub">${h.created_at.substring(0,16)}</p><p class="text-[10px] font-bold ${statusColor}">${h.status}</p></div></div>`;
+                    
+                    // FITUR BARU: Tombol Lacak Order untuk status PROCESSING/PENDING
+                    let trackBtn = (h.status === 'PROCESSING' || h.status === 'PENDING') 
+                        ? `<button onclick="trackOrder('${h.inv_id}')" class="text-[9px] bg-blue-900/50 border border-blue-500 text-blue-300 px-2 py-0.5 rounded shadow-sm active:scale-95 ml-2">LACAK</button>` 
+                        : '';
+                    
+                    c.innerHTML += `<div class="bg-black/60 p-3 rounded-xl border border-theme shadow-inner mb-3"><div class="flex justify-between items-center mb-1"><h4 class="font-bold text-sm ${icon}">${h.item_name}</h4><span class="text-xs font-bold text-white">Rp ${h.total_price.toLocaleString('id-ID')}</span></div><div class="flex justify-between items-center"><p class="text-[10px] text-theme-sub">${h.created_at.substring(0,16)}</p><div class="flex items-center"><p class="text-[10px] font-bold ${statusColor}">${h.status}</p>${trackBtn}</div></div></div>`;
                 });
             } else { c.innerHTML = '<p class="text-center text-xs text-theme-sub py-5">Belum ada riwayat transaksi.</p>'; }
         }
     }catch(e){}
+}
+
+async function trackOrder(inv_id) {
+    tg.MainButton.showProgress();
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/get_history/track/${inv_id}`, { headers: {'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'} });
+        const d = await res.json();
+        if(res.ok) { tg.showAlert(d.message); loadHistory(); loadUserData(); } else { tg.showAlert("Gagal: " + d.detail); }
+    } catch(e) { tg.showAlert("Kesalahan koneksi."); }
+    tg.MainButton.hideProgress();
 }
 
 // --- 7. DEPOSIT & DONATE ---
@@ -1620,8 +1636,11 @@ async function loadMySquad() {
 
                 // Render Active Members
                 const memC = document.getElementById('mySquadMembers');
-                memC.innerHTML = data.data.members.map(m => `
-                    <div class="flex justify-between items-center bg-black/40 p-2 rounded-lg border border-gray-800">
+                const isMeLeader = data.data.members.find(x => x.user_id == tgUser && x.role === 'leader');
+                memC.innerHTML = data.data.members.map(m => {
+                    let kickBtn = (isMeLeader && m.user_id != tgUser) ? `<button onclick="kickSquadMember(${m.user_id})" class="text-[9px] bg-red-900/50 text-red-400 border border-red-500 px-2 py-0.5 rounded shadow-sm active:scale-95 ml-2">KICK</button>` : '';
+                    return `
+                    <div class="flex justify-between items-center bg-black/40 p-2 rounded-lg border border-gray-800 mb-1">
                         <div class="flex items-center gap-2">
                             <img src="${m.photo_url || `${API_BASE_URL}/api/avatar/${m.user_id}`}" class="w-8 h-8 rounded-full border border-theme object-cover" onerror="this.src='template_default.png'">
                             <div>
@@ -1629,15 +1648,18 @@ async function loadMySquad() {
                                 <p class="text-[9px] text-theme-sub">⭐ ${parseFloat(m.rating).toFixed(1)} | ${m.hero}</p>
                             </div>
                         </div>
-                        <span class="text-[9px] font-bold ${m.role === 'leader' ? 'text-yellow-400' : 'text-blue-300'}">${m.role.toUpperCase()}</span>
+                        <div class="flex items-center">
+                            <span class="text-[9px] font-bold ${m.role === 'leader' ? 'text-yellow-400' : 'text-blue-300'}">${m.role.toUpperCase()}</span>
+                            ${kickBtn}
+                        </div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
                 document.getElementById('mySqCount').innerText = `${data.data.members.length}/10`;
 
                 // Leader Panel (Pending Requests)
-                const isLeader = data.data.members.find(m => m.user_id == tgUser && m.role === 'leader');
                 const pC = document.getElementById('mySquadPending');
-                if(isLeader) {
+                if(isMeLeader) {
                     document.getElementById('squadLeaderControls').classList.remove('hidden');
                     document.getElementById('sqPendingBadge').innerText = data.data.pending.length;
                     if(data.data.pending.length > 0) {
@@ -1679,6 +1701,19 @@ async function processSquadJoin(userId, action) {
         if(res.ok) loadMySquad(); else tg.showAlert("Gagal: " + d.detail);
     } catch(e) { tg.showAlert("Koneksi gagal."); }
     tg.MainButton.hideProgress();
+}
+
+async function kickSquadMember(userId) {
+    tg.showConfirm("Yakin ingin mengeluarkan member ini dari Squad?", async function(r) {
+        if(!r) return;
+        tg.MainButton.showProgress();
+        try {
+            const res = await fetch(API_BASE_URL + '/api/squad/kick', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ target_user_id: userId }) });
+            const d = await res.json();
+            if(res.ok) { tg.showAlert(d.message); loadMySquad(); } else { tg.showAlert("Gagal: " + d.detail); }
+        } catch(e) { tg.showAlert("Koneksi gagal."); }
+        tg.MainButton.hideProgress();
+    });
 }
 
 async function leaveSquad() {
@@ -1785,7 +1820,7 @@ async function joinTournament(tourId) {
     tg.MainButton.hideProgress();
 }
 
-// --- LOGIKA VISUALISASI BRACKET (HIBRIDA 8 TIM) ---
+// --- LOGIKA VISUALISASI BRACKET (HIBRIDA 8 TIM & 16 TIM) ---
 async function openBracketModal(tourId, tourName, status) {
     activeTournamentId = tourId;
     document.getElementById('bracketTourName').innerText = tourName;
@@ -1811,12 +1846,6 @@ function renderBracket(matches) {
         return;
     }
     
-    // Pisahkan match berdasarkan kolom (Spesifik Format Hybrid 8 Tim)
-    // Kolom 1: M1, M2, M3, M4 (Qualifiers)
-    // Kolom 2: M5, M6 (Upper SF) & M7 (Lower R1)
-    // Kolom 3: M8 (Upper Final) & M9 (Lower Final)
-    // Kolom 4: M10 (Grand Final)
-    
     const getMatchBox = (m) => {
         if(!m) return '';
         const isCompleted = m.status === 'completed';
@@ -1832,7 +1861,7 @@ function renderBracket(matches) {
         }
         
         return `
-        <div ${clickAction} class="w-40 border ${borderCls} ${bgCls} rounded-lg shadow-[0_0_10px_rgba(0,0,0,0.5)] flex flex-col mb-4 overflow-hidden relative">
+        <div ${clickAction} class="w-40 border ${borderCls} ${bgCls} rounded-lg shadow-[0_0_10px_rgba(0,0,0,0.5)] flex flex-col mb-4 overflow-hidden relative flex-shrink-0">
             <div class="bg-black/80 px-2 py-1 text-[8px] font-bold text-gray-400 border-b border-theme text-center truncate">${m.round_name}</div>
             <div class="flex items-center gap-2 p-2 border-b border-gray-800 bg-black/40">
                 <img src="${m.squad1_logo||'template_default.png'}" class="w-4 h-4 rounded-full border border-gray-600" onerror="this.src='template_default.png'">
@@ -1846,35 +1875,79 @@ function renderBracket(matches) {
         </div>`;
     };
 
-    let col1='', col2='', col3='', col4='';
-    
-    // Susun secara manual agar rapi secara visual
-    col1 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">Kualifikasi (Gugur)</div>`;
-    [1,2,3,4].forEach(mo => col1 += getMatchBox(matches.find(m => m.match_order === mo)));
-    
-    col2 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">Semi Final & Lower R1</div>`;
-    col2 += getMatchBox(matches.find(m => m.match_order === 5));
-    col2 += `<div class="h-10"></div>`; // Jarak visual
-    col2 += getMatchBox(matches.find(m => m.match_order === 6));
-    col2 += `<div class="h-10"></div>`;
-    col2 += getMatchBox(matches.find(m => m.match_order === 7)); // Lower R1
-    
-    col3 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">Finals</div>`;
-    col3 += `<div class="h-16"></div>`;
-    col3 += getMatchBox(matches.find(m => m.match_order === 8)); // Upper F
-    col3 += `<div class="h-16"></div>`;
-    col3 += getMatchBox(matches.find(m => m.match_order === 9)); // Lower F
-    
-    col4 += `<div class="text-[9px] text-yellow-400 font-bold text-center mb-2">Grand Final</div>`;
-    col4 += `<div class="h-32"></div>`;
-    col4 += getMatchBox(matches.find(m => m.match_order === 10));
+    // --- LOGIKA SPLIT BAGAN (8 TIM vs 16 TIM) ---
+    if (matches.length <= 10) {
+        // Mode 8 Tim (4 Kolom)
+        let col1='', col2='', col3='', col4='';
+        
+        col1 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">Kualifikasi (Gugur)</div>`;
+        [1,2,3,4].forEach(mo => col1 += getMatchBox(matches.find(m => m.match_order === mo)));
+        
+        col2 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">Semi Final & Lower R1</div>`;
+        col2 += getMatchBox(matches.find(m => m.match_order === 5));
+        col2 += `<div class="h-10"></div>`; 
+        col2 += getMatchBox(matches.find(m => m.match_order === 6));
+        col2 += `<div class="h-10"></div>`;
+        col2 += getMatchBox(matches.find(m => m.match_order === 7)); // Lower R1
+        
+        col3 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">Finals</div>`;
+        col3 += `<div class="h-16"></div>`;
+        col3 += getMatchBox(matches.find(m => m.match_order === 8)); // Upper F
+        col3 += `<div class="h-16"></div>`;
+        col3 += getMatchBox(matches.find(m => m.match_order === 9)); // Lower F
+        
+        col4 += `<div class="text-[9px] text-yellow-400 font-bold text-center mb-2">Grand Final</div>`;
+        col4 += `<div class="h-32"></div>`;
+        col4 += getMatchBox(matches.find(m => m.match_order === 10));
 
-    c.innerHTML = `
-        <div class="flex flex-col">${col1}</div>
-        <div class="flex flex-col">${col2}</div>
-        <div class="flex flex-col">${col3}</div>
-        <div class="flex flex-col">${col4}</div>
-    `;
+        c.innerHTML = `
+            <div class="flex flex-col">${col1}</div>
+            <div class="flex flex-col">${col2}</div>
+            <div class="flex flex-col">${col3}</div>
+            <div class="flex flex-col">${col4}</div>
+        `;
+    } else {
+        // Mode 16 Tim (6 Kolom Hibrida Presisi)
+        let col1='', col2='', col3='', col4='', col5='', col6='';
+        
+        col1 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">Kualifikasi (Gugur)</div>`;
+        [1,2,3,4,5,6,7,8].forEach(mo => col1 += getMatchBox(matches.find(m => m.match_order === mo)));
+        
+        col2 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">UB QF</div>`;
+        [9,10,11,12].forEach(mo => col2 += getMatchBox(matches.find(m => m.match_order === mo)));
+        col2 += `<div class="text-[9px] text-yellow-600 font-bold text-center mt-4 mb-2">Lower R1</div>`;
+        [15,16].forEach(mo => col2 += getMatchBox(matches.find(m => m.match_order === mo)));
+
+        col3 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">UB Semi Final</div>`;
+        col3 += `<div class="h-8"></div>`;
+        [13,14].forEach(mo => { col3 += getMatchBox(matches.find(m => m.match_order === mo)); col3 += `<div class="h-16"></div>`; });
+        col3 += `<div class="text-[9px] text-yellow-600 font-bold text-center mt-2 mb-2">Lower R2</div>`;
+        [17,18].forEach(mo => col3 += getMatchBox(matches.find(m => m.match_order === mo)));
+
+        col4 += `<div class="text-[9px] text-theme-sub font-bold text-center mb-2">Upper Final</div>`;
+        col4 += `<div class="h-24"></div>`;
+        col4 += getMatchBox(matches.find(m => m.match_order === 20));
+        col4 += `<div class="h-48"></div>`;
+        col4 += `<div class="text-[9px] text-yellow-600 font-bold text-center mb-2">Lower Semi Final</div>`;
+        col4 += getMatchBox(matches.find(m => m.match_order === 19));
+
+        col5 += `<div class="text-[9px] text-yellow-600 font-bold text-center mb-2">Lower Final</div>`;
+        col5 += `<div class="h-[380px]"></div>`; 
+        col5 += getMatchBox(matches.find(m => m.match_order === 21));
+
+        col6 += `<div class="text-[9px] text-yellow-400 font-bold text-center mb-2">Grand Final</div>`;
+        col6 += `<div class="h-[240px]"></div>`; 
+        col6 += getMatchBox(matches.find(m => m.match_order === 22));
+
+        c.innerHTML = `
+            <div class="flex flex-col">${col1}</div>
+            <div class="flex flex-col">${col2}</div>
+            <div class="flex flex-col">${col3}</div>
+            <div class="flex flex-col">${col4}</div>
+            <div class="flex flex-col">${col5}</div>
+            <div class="flex flex-col">${col6}</div>
+        `;
+    }
 }
 
 // Khusus Owner
