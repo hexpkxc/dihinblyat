@@ -96,7 +96,7 @@ const setSlotIcon = (id, url, cls) => {
 
 async function loadAppearance() {
     try {
-        const res = await fetch(API_BASE_URL + '/api/get_appearance', { headers: {'Authorization': tg.initData||''} });
+        const res = await fetch(API_BASE_URL + '/api/get_appearance', { headers: {'Authorization': tg.initData||'', 'ngrok-skip-browser-warning': 'true'} });
         if (res.ok) {
             const d = await res.json();
             if(d.marquee_text) { 
@@ -299,7 +299,7 @@ async function checkGameAccount() {
     
     b.innerHTML="⏳ Mengecek..."; b.disabled=true; r.classList.add('hidden');
     try {
-        const res = await fetch(`${API_BASE_URL}/api/check_mlbb?mlbb_id=${u}&zone_id=${z||'0'}`,{headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(`${API_BASE_URL}/api/check_mlbb?mlbb_id=${u}&zone_id=${z||'0'}`,{headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         const d = await res.json();
         if(res.ok && d.status==='success'){ 
             valGameNick=d.nickname; 
@@ -371,7 +371,7 @@ async function refreshPricelistUI() {
 
 async function loadPricelist() {
     try { 
-        const res = await fetch(API_BASE_URL + '/api/get_pricelist',{headers:{'Authorization':tg.initData||''}}); 
+        const res = await fetch(API_BASE_URL + '/api/get_pricelist',{headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}}); 
         if(res.ok) parseP(await res.json()); else useMk(); 
     } catch(e) { useMk(); }
 }
@@ -410,7 +410,7 @@ async function pDia() {
     document.getElementById('mainButtonContainer').classList.add('hidden'); openModal('txLoadingModal');
     try {
         const res = await fetch(API_BASE_URL + '/api/purchase_diamond', {
-            method:'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''},
+            method:'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'},
             body:JSON.stringify({sku: selGameSku, item_name: selGameNm, mlbb_id: document.getElementById('gameId').value, zone_id: document.getElementById('gameZone').value, nickname: valGameNick, price: selGamePrc})
         });
         const d = await res.json(); closeModal('txLoadingModal'); 
@@ -426,7 +426,7 @@ async function pSos() {
     document.getElementById('mainButtonContainer').classList.add('hidden'); openModal('txLoadingModal');
     try {
         const res = await fetch(API_BASE_URL + '/api/purchase_sosmed',{
-            method:'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''},
+            method:'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'},
             body:JSON.stringify({sku: selSosSku, item_name: `[${q}] ${selSosNm}`, target_link: l, quantity: q, price: Math.ceil((selSosPrc/1000)*q)})
         });
         const d = await res.json(); closeModal('txLoadingModal'); 
@@ -453,7 +453,7 @@ async function refreshSaldo() {
 
 async function loadUserData() {
     try {
-        const res = await fetch(API_BASE_URL + '/api/get_user/me',{headers:{'Authorization':tg.initData||''}}); 
+        const res = await fetch(API_BASE_URL + '/api/get_user/me',{headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}}); 
         if(res.ok){ 
             const u = await res.json(); 
             document.getElementById('profNick').innerText = u.nickname || "-"; 
@@ -498,7 +498,7 @@ async function refreshLeaderboardUI(btn) {
 async function loadLeaderboard() {
     const dC = document.getElementById('listTopDonators'), rC = document.getElementById('listTopRatings');
     try {
-        const res = await fetch(API_BASE_URL + '/api/leaderboard',{headers:{'Authorization':tg.initData||''}}); 
+        const res = await fetch(API_BASE_URL + '/api/leaderboard',{headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}}); 
         if(res.ok){ 
             const d = await res.json(); dC.innerHTML=''; 
             if(d.donators && d.donators.length>0) {
@@ -522,7 +522,7 @@ async function loadHistory() {
     c.innerHTML = '<p class="text-center text-xs py-5">Memuat histori mutasi...</p>';
     openModal('historyModal');
     try {
-        const res = await fetch(API_BASE_URL + '/api/get_history', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/get_history', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); c.innerHTML = '';
             if(data.data.length > 0) {
@@ -592,7 +592,7 @@ async function submitDeposit() {
         }
 
         const res = await fetch(API_BASE_URL + '/api/submit_deposit', {
-            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''},
+            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'},
             body: JSON.stringify({amount: finalAmount, method: method, sender_name: sender, photos_b64: b64Array})
         });
         
@@ -622,7 +622,7 @@ async function processDonate() {
     
     try {
         const res = await fetch(API_BASE_URL + '/api/process_donation', {
-            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''},
+            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'},
             body: JSON.stringify({amount: parseInt(amount), message: msg || "-"})
         });
         const d = await res.json();
@@ -643,7 +643,7 @@ async function saveProfile() {
     
     try {
         const res = await fetch(API_BASE_URL + '/api/update_profile', {
-            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''},
+            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'},
             body: JSON.stringify({nickname: nick, role: role, hero: hero, bio: bio, photo_url: photoUrl})
         });
         if(res.ok) { tg.showAlert("Profil diperbarui!"); closeModal('editProfileModal'); loadUserData(); } 
@@ -670,7 +670,7 @@ async function createRoom() {
     
     try{ 
         const res = await fetch(API_BASE_URL + '/api/create_room',{
-            method:'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''},
+            method:'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'},
             body:JSON.stringify({host_id:tgUser,room_type:t.options[t.selectedIndex].text,min_rank:r.options[r.selectedIndex].text,needed_roles:rl,mlbb_id:"-",notes:document.getElementById('rNote').value.trim()||"Gas",expire_minutes:parseInt(document.getElementById('rExp').value)})
         }); 
         const d = await res.json(); 
@@ -688,7 +688,7 @@ async function loadRooms() {
     const c = document.getElementById('listRoomAktif'); 
     c.innerHTML = '<p class="text-center text-xs py-5">Memuat Live Server...</p>';
     try {
-        const res = await fetch(API_BASE_URL + '/api/get_rooms', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/get_rooms', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); c.innerHTML = '';
             if(data.length > 0) {
@@ -733,7 +733,7 @@ async function joinRoomInApp(roomId, roleTarget, btnEl) {
     const oTxt = btnEl.innerText; btnEl.innerText = "⏳..."; btnEl.disabled = true;
     try {
         const res = await fetch(API_BASE_URL + '/api/mabar/join_room', { 
-            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, 
+            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, 
             body: JSON.stringify({room_id: roomId, role_target: roleTarget}) 
         });
         const d = await res.json();
@@ -745,7 +745,7 @@ async function joinRoomInApp(roomId, roleTarget, btnEl) {
 
 async function checkActiveRoomState() {
     try { 
-        const res = await fetch(API_BASE_URL + '/api/mabar/my_room',{headers:{'Authorization':tg.initData||''}}); 
+        const res = await fetch(API_BASE_URL + '/api/mabar/my_room',{headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}}); 
         if (res.ok) { 
             const r = await res.json(); 
             if (r.status === 'success' && r.data) { 
@@ -804,7 +804,7 @@ async function submitEditRoom() {
     tg.MainButton.showProgress();
     try {
         const res = await fetch(API_BASE_URL + '/api/mabar/edit_room', { 
-            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, 
+            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, 
             body: JSON.stringify({ needed_roles: roles, min_rank: rank, notes: note }) 
         });
         if(res.ok) { tg.showAlert("Detail room berhasil diperbarui!"); closeModal('editRoomModal'); checkActiveRoomState(); } 
@@ -818,7 +818,7 @@ async function processCancelRoom() {
         if(r) {
             tg.MainButton.showProgress();
             try {
-                const res = await fetch(API_BASE_URL + '/api/mabar/cancel_room', { method: 'POST', headers:{'Authorization':tg.initData||''} });
+                const res = await fetch(API_BASE_URL + '/api/mabar/cancel_room', { method: 'POST', headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'} });
                 if(res.ok) { displayMabarFormPanel(); tg.showAlert("Room berhasil dibatalkan."); } 
                 else { const d = await res.json(); tg.showAlert("Gagal: " + d.detail); }
             } catch(e) { tg.showAlert("Kesalahan koneksi."); }
@@ -829,7 +829,7 @@ async function processCancelRoom() {
 
 async function fetchHostRequests() {
     try {
-        const res = await fetch(API_BASE_URL + '/api/mabar/host/requests', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/mabar/host/requests', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if (res.ok) {
             const data = await res.json();
             const c = document.getElementById('hostRequestsContainer');
@@ -871,7 +871,7 @@ async function processHostRequest(reqId, action, btnEl) {
     btnEl.innerText = "⏳..."; btnEl.disabled = true;
     try {
         const res = await fetch(API_BASE_URL + '/api/mabar/host/action', {
-            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''},
+            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'},
             body: JSON.stringify({req_id: reqId, action: action})
         });
         const d = await res.json();
@@ -929,7 +929,7 @@ async function loadRoomChat(showLoading = true) {
     const c = document.getElementById('chatMessagesRoom'); if(!c) return;
     if(showLoading) c.innerHTML = '<p class="text-center text-xs py-5 text-theme-sub">Memuat Room Chat...</p>';
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/room/messages', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/chat/room/messages', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); 
             if(data.room_info) {
@@ -995,7 +995,7 @@ async function sendRoomChat() {
     const text = document.getElementById('chatInputRoom').value.trim(); if(!text) return;
     const btn = document.getElementById('btnSendRoomChat'); btn.innerText = "⏳"; btn.disabled = true;
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/room/send', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({content: text}) });
+        const res = await fetch(API_BASE_URL + '/api/chat/room/send', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({content: text}) });
         if(res.ok) { document.getElementById('chatInputRoom').value = ""; await loadRoomChat(true); } else tg.showAlert("Gagal mengirim pesan Room.");
     }catch(e){} btn.innerText = "Kirim"; btn.disabled = false;
 }
@@ -1003,7 +1003,7 @@ async function sendRoomChat() {
 async function startMatch() {
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/mabar/start_match', { method: 'POST', headers:{'Authorization':tg.initData||''} });
+        const res = await fetch(API_BASE_URL + '/api/mabar/start_match', { method: 'POST', headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'} });
         if(res.ok) {
             tg.showAlert("Mabar dimulai! Room telah disembunyikan dari Server Publik.");
             checkActiveRoomState(); loadRoomChat(true); 
@@ -1019,7 +1019,7 @@ async function leaveEarly() {
     try {
         const isHost = currentActiveRoomInfo && currentActiveRoomInfo.is_host;
         const endpoint = isHost ? '/api/mabar/cancel_room' : '/api/mabar/leave_early';
-        const res = await fetch(API_BASE_URL + endpoint, { method: 'POST', headers:{'Authorization':tg.initData||''} });
+        const res = await fetch(API_BASE_URL + endpoint, { method: 'POST', headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'} });
         if(res.ok) {
             displayMabarFormPanel();
             tg.showAlert(isHost ? "Room berhasil dibatalkan." : "Anda berhasil keluar dari room.");
@@ -1036,7 +1036,7 @@ async function finishMatch() {
     try {
         const isHost = currentActiveRoomInfo && currentActiveRoomInfo.is_host;
         const endpoint = isHost ? '/api/mabar/close_room' : '/api/mabar/finish_member';
-        const res = await fetch(API_BASE_URL + endpoint, { method: 'POST', headers:{'Authorization':tg.initData||''} });
+        const res = await fetch(API_BASE_URL + endpoint, { method: 'POST', headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'} });
         if(res.ok) {
             displayMabarFormPanel(); 
             tg.showAlert("Mabar Selesai! Silakan berikan rating kepada rekan tim Anda.");
@@ -1054,7 +1054,7 @@ async function finishMatch() {
 async function loadPendingRatings() {
     const c = document.getElementById('listPendingRatings'); c.innerHTML = '<p class="text-center text-xs py-5">Memindai mabar yang belum diulas...</p>';
     try {
-        const res = await fetch(API_BASE_URL + '/api/mabar/pending_ratings', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/mabar/pending_ratings', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const d = await res.json(); c.innerHTML = '';
             if(d.data.length > 0) {
@@ -1097,7 +1097,7 @@ async function submitRating() {
     const btn = document.getElementById('btnSubmitRating'); const originalText = btn.innerText; btn.innerText = "⏳ Memproses..."; btn.disabled = true; tg.MainButton.showProgress();
     try {
         const res = await fetch(API_BASE_URL + '/api/mabar/submit_rating', { 
-            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, 
+            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, 
             body: JSON.stringify({ target_id: rateTarget, room_id: rateRoom, score: rateScore, photo_b64: b64 }) 
         });
         const d = await res.json();
@@ -1111,7 +1111,7 @@ async function skipRatingDirect(targetId, roomId) {
     tg.MainButton.showProgress();
     try {
         const res = await fetch(API_BASE_URL + '/api/mabar/skip_rating', { 
-            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, 
+            method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, 
             body: JSON.stringify({ target_id: targetId, room_id: roomId }) 
         });
         if(res.ok) { 
@@ -1130,7 +1130,7 @@ async function loadCsChat(showLoading = true) {
     const c = document.getElementById('chatMessagesCs'); if(!c) return;
     if(showLoading) c.innerHTML = '<p class="text-center text-xs py-5 text-theme-sub">Memuat histori CS...</p>';
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/cs/messages', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/chat/cs/messages', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); 
             if(data.data && data.data.length > 0) {
@@ -1145,7 +1145,7 @@ async function sendCsChat() {
     const text = document.getElementById('chatInputCs').value.trim(); if(!text) return;
     const btn = document.getElementById('btnSendCsChat'); btn.innerText = "⏳"; btn.disabled = true;
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/cs/send', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({content: text}) });
+        const res = await fetch(API_BASE_URL + '/api/chat/cs/send', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({content: text}) });
         if(res.ok) { document.getElementById('chatInputCs').value = ""; await loadCsChat(true); } else tg.showAlert("Gagal mengirim pesan CS.");
     }catch(e){} btn.innerText = "Kirim"; btn.disabled = false;
 }
@@ -1153,7 +1153,7 @@ async function sendCsChat() {
 async function pollNotifBadge() {
     setInterval(async () => {
         try {
-            const res = await fetch(API_BASE_URL + '/api/notifications', {headers:{'Authorization':tg.initData||''}});
+            const res = await fetch(API_BASE_URL + '/api/notifications', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
             if(res.ok) {
                 const data = await res.json(); const unread = data.data.filter(n => !n.is_read).length;
                 if(unread > 0) { document.getElementById('notifBadge').classList.remove('hidden'); document.getElementById('notifBadgeDot').classList.remove('hidden'); } 
@@ -1167,7 +1167,7 @@ async function loadNotif() {
     const c = document.getElementById('listNotifikasi'); c.innerHTML = '<p class="text-center text-xs py-5">Memuat pemberitahuan...</p>';
     document.getElementById('notifBadge').classList.add('hidden'); document.getElementById('notifBadgeDot').classList.add('hidden');
     try {
-        const res = await fetch(API_BASE_URL + '/api/notifications', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/notifications', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); c.innerHTML = '';
             if(data.data && data.data.length > 0) {
@@ -1186,7 +1186,7 @@ async function loadNotif() {
 async function loadVipPlayers() {
     const c = document.getElementById('listVipPlayers'); c.innerHTML = '<p class="text-center text-xs py-5">Memuat data Host VIP...</p>';
     try {
-        const res = await fetch(API_BASE_URL + '/api/mabar/vip_players', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/mabar/vip_players', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const d = await res.json(); c.innerHTML = '';
             if(d.data.length > 0) {
@@ -1216,7 +1216,7 @@ async function submitVipApp() {
     const btn = document.getElementById('btnSubmitVip'); const originalText = btn.innerText; btn.innerText = "⏳ Memproses..."; btn.disabled = true; tg.MainButton.showProgress();
     try {
         const b64 = await getBase64(fileInput.files[0]); 
-        const res = await fetch(API_BASE_URL + '/api/mabar/apply_vip', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({ nickname: nick, hero: hero, high_rank: rank, price: parseInt(price), message: msg, photo_b64: b64 }) });
+        const res = await fetch(API_BASE_URL + '/api/mabar/apply_vip', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ nickname: nick, hero: hero, high_rank: rank, price: parseInt(price), message: msg, photo_b64: b64 }) });
         const d = await res.json();
         if(res.ok) { tg.showAlert(d.message); closeModal('applyVipModal'); } else tg.showAlert("Gagal: " + d.detail);
     }catch(e){ tg.showAlert("Terjadi kesalahan koneksi."); } finally { btn.innerText = originalText; btn.disabled = false; tg.MainButton.hideProgress(); }
@@ -1225,13 +1225,13 @@ async function submitVipApp() {
 async function loadVipContacts() {
     const c = document.getElementById('vipContactList'); c.innerHTML = '<p class="text-center text-xs py-5 text-theme-sub">Memuat data VIP...</p>';
     try {
-        const resOrder = await fetch(API_BASE_URL + '/api/chat/vip/order/list', {headers:{'Authorization':tg.initData||''}});
+        const resOrder = await fetch(API_BASE_URL + '/api/chat/vip/order/list', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(resOrder.ok) {
             const resJson = await resOrder.json();
             if(resJson.data.is_host) { renderHostDashboard(resJson.data.orders, resJson.data.inbox); return; } else { window.customerActiveOrders = resJson.data.orders; }
         }
 
-        const res = await fetch(API_BASE_URL + '/api/chat/vip/contacts', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/chat/vip/contacts', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); c.innerHTML = '';
             if(window.customerActiveOrders && window.customerActiveOrders.length > 0) {
@@ -1260,7 +1260,7 @@ async function renderHostDashboard(orders, inbox) {
     const c = document.getElementById('vipContactList');
     let hostBalance = 0;
     try {
-        const resU = await fetch(API_BASE_URL + '/api/get_user/me',{headers:{'Authorization':tg.initData||''}});
+        const resU = await fetch(API_BASE_URL + '/api/get_user/me',{headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(resU.ok) { const u = await resU.json(); hostBalance = u.host_balance || 0; }
     }catch(e){}
 
@@ -1351,7 +1351,7 @@ async function loadVipChat(showLoading = true) {
     if(showLoading) c.innerHTML = '<p class="text-center text-xs py-5 text-theme-sub">Memuat DM VIP...</p>';
     
     try {
-        const resOrder = await fetch(API_BASE_URL + '/api/chat/vip/order/list', {headers:{'Authorization':tg.initData||''}});
+        const resOrder = await fetch(API_BASE_URL + '/api/chat/vip/order/list', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(resOrder.ok) {
             const orderData = await resOrder.json();
             if(!orderData.data.is_host) {
@@ -1379,7 +1379,7 @@ async function loadVipChat(showLoading = true) {
             } else { b.classList.add('hidden'); }
         }
 
-        const res = await fetch(`${API_BASE_URL}/api/chat/vip/messages?target_id=${activeVipTarget}`, {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(`${API_BASE_URL}/api/chat/vip/messages?target_id=${activeVipTarget}`, {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); 
             if(data.data && data.data.length > 0) {
@@ -1395,7 +1395,7 @@ async function sendVipChat() {
     const text = document.getElementById('chatInputVip').value.trim(); if(!text) return;
     const btn = document.getElementById('btnSendVipChat'); btn.innerText = "⏳"; btn.disabled = true;
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/vip/send', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({target_id: activeVipTarget, content: text}) });
+        const res = await fetch(API_BASE_URL + '/api/chat/vip/send', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({target_id: activeVipTarget, content: text}) });
         if(res.ok) { document.getElementById('chatInputVip').value = ""; await loadVipChat(true); } 
         else tg.showAlert("Gagal mengirim DM VIP.");
     }catch(e){} btn.innerText = "Kirim"; btn.disabled = false;
@@ -1412,7 +1412,7 @@ async function submitVipOrder() {
     
     const btn = document.getElementById('btnSubmitVipOrder'); const oTxt = btn.innerText; btn.innerText = "⏳..."; btn.disabled = true; tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/vip/order/create', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({host_id: activeVipTarget, match_count: matchCount}) });
+        const res = await fetch(API_BASE_URL + '/api/chat/vip/order/create', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({host_id: activeVipTarget, match_count: matchCount}) });
         const d = await res.json();
         if(res.ok) { closeModal('orderVipModal'); tg.showAlert("Order berhasil dibuat! Saldo kamu diamankan sistem."); loadVipChat(); loadUserData(); } 
         else tg.showAlert("Gagal: " + d.detail);
@@ -1423,7 +1423,7 @@ function cancelVipOrder(orderId) {
     tg.showConfirm('Yakin membatalkan orderan ini? Saldo dikembalikan.', async function(r){
         if(!r) return; tg.MainButton.showProgress();
         try {
-            const res = await fetch(API_BASE_URL + '/api/chat/vip/order/cancel', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({order_id: orderId}) });
+            const res = await fetch(API_BASE_URL + '/api/chat/vip/order/cancel', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({order_id: orderId}) });
             if(res.ok) { tg.showAlert("Order Dibatalkan."); loadVipChat(); loadUserData(); } else { const d = await res.json(); tg.showAlert(d.detail); }
         } catch(e){} finally { tg.MainButton.hideProgress(); }
     });
@@ -1432,7 +1432,7 @@ function cancelVipOrder(orderId) {
 async function actionVipOrder(orderId, action) {
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/vip/order/action', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({order_id: orderId, action: action}) });
+        const res = await fetch(API_BASE_URL + '/api/chat/vip/order/action', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({order_id: orderId, action: action}) });
         if(res.ok) { tg.showAlert("Aksi berhasil!"); loadVipContacts(); } else { const d = await res.json(); tg.showAlert(d.detail); }
     } catch(e){} finally { tg.MainButton.hideProgress(); }
 }
@@ -1443,7 +1443,7 @@ async function submitWithdraw() {
     
     const btn = document.getElementById('btnSubmitWd'); const oTxt = btn.innerText; btn.innerText = "⏳..."; btn.disabled = true; tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/vip/withdraw', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({amount: amount, method: method, account_info: acc}) });
+        const res = await fetch(API_BASE_URL + '/api/chat/vip/withdraw', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({amount: amount, method: method, account_info: acc}) });
         const d = await res.json();
         if(res.ok) { closeModal('wdModal'); tg.showAlert("Permintaan withdraw berhasil dikirim ke Admin!"); document.getElementById('wdAmount').value = ''; document.getElementById('wdAccount').value = ''; loadVipContacts(); } 
         else tg.showAlert("Gagal: " + d.detail);
@@ -1454,7 +1454,7 @@ async function submitWithdraw() {
 async function openVipProfile(hostId) {
     openModal('txLoadingModal'); 
     try {
-        const res = await fetch(`${API_BASE_URL}/api/vip/profile/${hostId}`, {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(`${API_BASE_URL}/api/vip/profile/${hostId}`, {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json();
             document.getElementById('vProfImg').src = data.profile.photo_url || `${API_BASE_URL}/api/avatar/${hostId}`;
@@ -1486,7 +1486,7 @@ function finishVipOrder(orderId, hostId, hostName) {
     tg.showConfirm('Konfirmasi mabar selesai? Dana akan diteruskan ke Host.', async function(r){
         if(!r) return; tg.MainButton.showProgress();
         try {
-            const res = await fetch(API_BASE_URL + '/api/chat/vip/order/finish', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({order_id: orderId}) });
+            const res = await fetch(API_BASE_URL + '/api/chat/vip/order/finish', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({order_id: orderId}) });
             if(res.ok) { 
                 tg.showAlert("Pesanan Selesai! Silakan berikan Testimoni Anda."); loadVipChat(); 
                 activeVipTarget = hostId; document.getElementById('vipRateName').innerText = hostName; setVipScore(5); document.getElementById('vipRateComment').value = "";
@@ -1510,7 +1510,7 @@ async function submitVipRating() {
     if(!comment) return tg.showAlert("Ulasan/Komentar wajib diisi!");
     const btn = document.getElementById('btnSubmitVipRating'); btn.innerText = "⏳ Memproses..."; btn.disabled = true; tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/vip/submit_rating', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || ''}, body: JSON.stringify({ host_id: activeVipTarget, score: parseInt(score), comment: comment }) });
+        const res = await fetch(API_BASE_URL + '/api/vip/submit_rating', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ host_id: activeVipTarget, score: parseInt(score), comment: comment }) });
         const d = await res.json();
         if(res.ok) { tg.showAlert("Terima kasih atas ulasannya!"); closeModal('vipRateModal'); loadUserData(); } else { tg.showAlert("Gagal: " + d.detail); }
     } catch(e) { tg.showAlert("Kesalahan jaringan."); } finally { btn.innerText = "KIRIM TESTIMONI"; btn.disabled = false; tg.MainButton.hideProgress(); }
@@ -1530,7 +1530,7 @@ async function createSquad() {
 
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/squad/create', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || ''}, body: JSON.stringify({ name: name, tag: tag, logo_url: logoUrl }) });
+        const res = await fetch(API_BASE_URL + '/api/squad/create', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ name: name, tag: tag, logo_url: logoUrl }) });
         const d = await res.json();
         if(res.ok) { tg.showAlert(d.message); loadMySquad(); } else { tg.showAlert("Gagal: " + d.detail); }
     } catch(e) { tg.showAlert("Koneksi gagal."); }
@@ -1543,7 +1543,7 @@ async function joinSquad() {
 
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/squad/join', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || ''}, body: JSON.stringify({ squad_id_str: sqId }) });
+        const res = await fetch(API_BASE_URL + '/api/squad/join', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ squad_id_str: sqId }) });
         const d = await res.json();
         if(res.ok) { tg.showAlert(d.message); loadMySquad(); } else { tg.showAlert("Gagal: " + d.detail); }
     } catch(e) { tg.showAlert("Koneksi gagal."); }
@@ -1552,7 +1552,7 @@ async function joinSquad() {
 
 async function loadMySquad() {
     try {
-        const res = await fetch(API_BASE_URL + '/api/squad/my', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/squad/my', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json();
             if(data.data && data.data.info) {
@@ -1622,7 +1622,7 @@ function copySquadId() {
 async function processSquadJoin(userId, action) {
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/squad/action', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || ''}, body: JSON.stringify({ req_user_id: userId, action: action }) });
+        const res = await fetch(API_BASE_URL + '/api/squad/action', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ req_user_id: userId, action: action }) });
         const d = await res.json();
         if(res.ok) loadMySquad(); else tg.showAlert("Gagal: " + d.detail);
     } catch(e) { tg.showAlert("Koneksi gagal."); }
@@ -1632,7 +1632,7 @@ async function processSquadJoin(userId, action) {
 async function leaveSquad() {
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/squad/leave', { method: 'POST', headers: {'Authorization': tg.initData || ''} });
+        const res = await fetch(API_BASE_URL + '/api/squad/leave', { method: 'POST', headers: {'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'} });
         const d = await res.json();
         if(res.ok) { tg.showAlert("Berhasil keluar dari squad."); loadMySquad(); } else tg.showAlert("Gagal: " + d.detail);
     } catch(e) { tg.showAlert("Koneksi gagal."); }
@@ -1644,7 +1644,7 @@ async function loadSquadChat(showLoading = true) {
     const c = document.getElementById('chatMessagesSquad'); if(!c || !mySquadId) return;
     if(showLoading) c.innerHTML = '<p class="text-center text-[10px] py-5 text-theme-sub">Memuat Basecamp...</p>';
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/squad/messages', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/chat/squad/messages', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); 
             if(data.data && data.data.length > 0) {
@@ -1658,7 +1658,7 @@ async function loadSquadChat(showLoading = true) {
 async function sendSquadChat() {
     const text = document.getElementById('chatInputSquad').value.trim(); if(!text || !mySquadId) return;
     try {
-        const res = await fetch(API_BASE_URL + '/api/chat/squad/send', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||''}, body: JSON.stringify({squad_id: mySquadId, content: text}) });
+        const res = await fetch(API_BASE_URL + '/api/chat/squad/send', { method: 'POST', headers:{'Content-Type':'application/json','Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({squad_id: mySquadId, content: text}) });
         if(res.ok) { document.getElementById('chatInputSquad').value = ""; await loadSquadChat(false); }
     }catch(e){}
 }
@@ -1674,7 +1674,7 @@ async function loadTournaments() {
     else { document.getElementById('adminTourPanel').classList.add('hidden'); document.getElementById('ownerBracketControls').classList.add('hidden'); }
 
     try {
-        const res = await fetch(API_BASE_URL + '/api/tournament/list', {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(API_BASE_URL + '/api/tournament/list', {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json(); c.innerHTML = '';
             if(data.data.length > 0) {
@@ -1716,7 +1716,7 @@ async function createTournament() {
     
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/tournament/create', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || ''}, body: JSON.stringify({ name: name, format_bo: bo, slot_count: slots, entry_fee: fee }) });
+        const res = await fetch(API_BASE_URL + '/api/tournament/create', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ name: name, format_bo: bo, slot_count: slots, entry_fee: fee }) });
         const d = await res.json();
         if(res.ok) { tg.showAlert("Turnamen berhasil di-publish!"); loadTournaments(); } else { tg.showAlert("Gagal: " + d.detail); }
     } catch(e) { tg.showAlert("Koneksi gagal."); }
@@ -1726,7 +1726,7 @@ async function createTournament() {
 async function joinTournament(tourId) {
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/tournament/join', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || ''}, body: JSON.stringify({ tournament_id: tourId }) });
+        const res = await fetch(API_BASE_URL + '/api/tournament/join', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ tournament_id: tourId }) });
         const d = await res.json();
         if(res.ok) { tg.showAlert(d.message); loadTournaments(); loadUserData(); } else { tg.showAlert("Gagal: " + d.detail); }
     } catch(e) { tg.showAlert("Koneksi gagal."); }
@@ -1744,7 +1744,7 @@ async function openBracketModal(tourId, tourName, status) {
     c.innerHTML = '<p class="text-center text-xs py-5 text-theme-sub w-full">Memuat Bagan Pertandingan...</p>';
     
     try {
-        const res = await fetch(`${API_BASE_URL}/api/tournament/bracket/${tourId}`, {headers:{'Authorization':tg.initData||''}});
+        const res = await fetch(`${API_BASE_URL}/api/tournament/bracket/${tourId}`, {headers:{'Authorization':tg.initData||'', 'ngrok-skip-browser-warning': 'true'}});
         if(res.ok) {
             const data = await res.json();
             renderBracket(data.data.matches);
@@ -1830,7 +1830,7 @@ async function generateBracket() {
     if(!activeTournamentId) return;
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/tournament/generate_bracket', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || ''}, body: JSON.stringify({ tournament_id: activeTournamentId }) });
+        const res = await fetch(API_BASE_URL + '/api/tournament/generate_bracket', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ tournament_id: activeTournamentId }) });
         const d = await res.json();
         if(res.ok) { tg.showAlert(d.message); openBracketModal(activeTournamentId, document.getElementById('bracketTourName').innerText, 'PLAYING'); } else { tg.showAlert("Gagal: " + d.detail); }
     } catch(e) { tg.showAlert("Koneksi gagal."); }
@@ -1850,7 +1850,7 @@ function openMatchReport(matchId, sq1Id, sq1Name, sq2Id, sq2Name, roundName) {
 async function submitMatchReport(winnerId) {
     tg.MainButton.showProgress();
     try {
-        const res = await fetch(API_BASE_URL + '/api/tournament/report_score', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || ''}, body: JSON.stringify({ match_id: reportMatchId, winner_squad_id: winnerId }) });
+        const res = await fetch(API_BASE_URL + '/api/tournament/report_score', { method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': tg.initData || '', 'ngrok-skip-browser-warning': 'true'}, body: JSON.stringify({ match_id: reportMatchId, winner_squad_id: winnerId }) });
         const d = await res.json();
         if(res.ok) { tg.showAlert("Skor Divalidasi! Bagan Otomatis Terupdate."); closeModal('matchReportModal'); openBracketModal(activeTournamentId, document.getElementById('bracketTourName').innerText, 'PLAYING'); } else { tg.showAlert("Gagal: " + d.detail); }
     } catch(e) { tg.showAlert("Koneksi gagal."); }
