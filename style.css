@@ -1,0 +1,265 @@
+/* =======================================================
+   TEMA HELLFIRE (MAXIMIZED ANIMATION)
+   ======================================================= */
+:root {
+    --bg-main: #070000; 
+    --grad-1: #1a0202; 
+    --grad-2: #050000;
+    --panel-bg: rgba(15, 0, 0, 0.85);
+    --fire-pri: #ff2a00; 
+    --fire-glow: #ff0000;
+    --blue-pri: #00e5ff; 
+    --blue-glow: #0044ff;
+    --border-light: rgba(255, 42, 0, 0.4); 
+    --border-dark: #660000;
+    --text-sub: #ff8888;
+    --p1: #ff4500; 
+    --p2: #ff0000; 
+    --p3: #ff7300;
+}
+
+/* Base Styles */
+body { 
+    background-color: var(--bg-main); 
+    color: #fff; 
+    font-family: -apple-system, Roboto, sans-serif; 
+    -webkit-tap-highlight-color: transparent; 
+}
+
+.bg-grad-body { 
+    background: radial-gradient(circle at center, var(--grad-1) 0%, var(--grad-2) 100%); 
+}
+
+.bg-dark { 
+    background-color: var(--bg-main); 
+}
+
+.text-glow-red { 
+    color: var(--fire-pri); 
+    text-shadow: 0 0 12px var(--fire-glow); 
+}
+
+.text-glow-blue { 
+    color: var(--blue-pri); 
+    text-shadow: 0 0 12px var(--blue-glow); 
+}
+
+.text-theme-sub { 
+    color: var(--text-sub); 
+}
+
+.border-theme { 
+    border-color: var(--border-dark); 
+}
+
+/* Glassmorphism Panel */
+.glass-panel { 
+    background: var(--panel-bg); 
+    backdrop-filter: blur(12px); 
+    border: 1px solid var(--border-light); 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 0 15px var(--border-light); 
+}
+
+/* Primary Button (Fire) */
+.btn-fire { 
+    background: linear-gradient(45deg, var(--border-dark), var(--fire-pri), var(--fire-glow)); 
+    background-size: 200% 200%; 
+    color: white; 
+    font-weight: bold; 
+    border: 1px solid var(--fire-pri); 
+    box-shadow: 0 0 20px rgba(255, 42, 0, 0.5); 
+    animation: gradFlow 3s infinite, pulseFire 2s infinite; 
+    transition: transform 0.2s, box-shadow 0.2s; 
+}
+
+.btn-fire:disabled { 
+    opacity: 0.7; 
+    cursor: not-allowed; 
+    animation: none; 
+    transform: scale(1); 
+    box-shadow: none; 
+}
+
+.btn-fire:active:not(:disabled) { 
+    transform: scale(0.95); 
+    box-shadow: 0 0 30px var(--fire-pri); 
+}
+
+/* Secondary Button (Blue) */
+.btn-blue { 
+    background: linear-gradient(45deg, #001133, var(--blue-pri), var(--blue-glow)); 
+    background-size: 200% 200%; 
+    color: white; 
+    font-weight: bold; 
+    border: 1px solid var(--blue-pri); 
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.5); 
+    animation: gradFlow 3s infinite, pulseBlue 2s infinite; 
+    transition: transform 0.2s, box-shadow 0.2s; 
+}
+
+.btn-blue:disabled { 
+    opacity: 0.7; 
+    cursor: not-allowed; 
+    animation: none; 
+    transform: scale(1); 
+    box-shadow: none; 
+}
+
+.btn-blue:active:not(:disabled) { 
+    transform: scale(0.95); 
+    box-shadow: 0 0 30px var(--blue-pri); 
+}
+
+/* Tab Navigation Buttons */
+.tab-btn-active { 
+    background: linear-gradient(90deg, var(--fire-pri), var(--border-dark)); 
+    border-color: var(--fire-pri); 
+    color: white; 
+    box-shadow: 0 0 15px var(--border-light); 
+    animation: pulseFire 2s infinite; 
+}
+
+.tab-btn-inactive { 
+    background: rgba(10, 0, 5, 0.8); 
+    border-color: var(--border-dark); 
+    color: #888; 
+}
+
+/* =======================================================
+   ANIMATIONS
+   ======================================================= */
+@keyframes gradFlow { 
+    0% { background-position: 0% 50%; } 
+    50% { background-position: 100% 50%; } 
+    100% { background-position: 0% 50%; } 
+}
+
+@keyframes pulseFire { 
+    0%, 100% { box-shadow: 0 0 8px var(--border-light); } 
+    50% { box-shadow: 0 0 20px var(--fire-pri); } 
+}
+
+@keyframes pulseBlue { 
+    0%, 100% { box-shadow: 0 0 8px var(--blue-glow); } 
+    50% { box-shadow: 0 0 20px var(--blue-pri); } 
+}
+
+@keyframes floatAnim { 
+    0%, 100% { transform: translateY(0); } 
+    50% { transform: translateY(-8px); } 
+}
+
+.anim-float { 
+    animation: floatAnim 4s ease-in-out infinite; 
+}
+
+.spin { 
+    animation: spin 1s linear infinite; 
+} 
+
+@keyframes spin { 
+    100% { transform: rotate(360deg); } 
+}
+
+/* Tab Content Visibility */
+.tab-content { 
+    display: none; 
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+} 
+
+.tab-content.active { 
+    display: block; 
+}
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px) scale(0.98); } 
+    to { opacity: 1; transform: translateY(0) scale(1); } 
+}
+
+/* Modal Slide In/Out */
+.modal-slide { 
+    transform: translateY(100%); 
+    opacity: 0; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+} 
+
+.modal-slide.open { 
+    transform: translateY(0); 
+    opacity: 1; 
+}
+
+/* Custom Checkbox Selection for Role Mabar & Edit Room */
+.role-checkbox:checked + div, 
+.edit-role-checkbox:checked + div { 
+    background: linear-gradient(45deg, var(--border-dark), var(--fire-pri)); 
+    border-color: var(--fire-pri); 
+    color: white; 
+    box-shadow: 0 0 15px var(--border-light); 
+    transform: scale(1.05); 
+    transition: all 0.2s;
+}
+
+/* Background Fire Particles */
+.fire-particles { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    pointer-events: none; 
+    z-index: 0; 
+    opacity: 0.45; 
+    background-image: 
+        radial-gradient(3px 3px at 20px 30px, var(--p1), transparent), 
+        radial-gradient(3px 3px at 40px 70px, var(--p2), transparent), 
+        radial-gradient(2px 2px at 50px 160px, var(--p3), transparent), 
+        radial-gradient(4px 4px at 90px 40px, var(--p1), transparent), 
+        radial-gradient(2px 2px at 130px 80px, var(--p2), transparent), 
+        radial-gradient(3px 3px at 160px 120px, var(--p3), transparent); 
+    background-repeat: repeat; 
+    background-size: 200px 200px; 
+    animation: fireFloat 5s linear infinite; 
+}
+
+@keyframes fireFloat { 
+    0% { transform: translateY(0) scale(1); opacity: 0.2; } 
+    50% { opacity: 0.7; } 
+    100% { transform: translateY(-200px) scale(1.5); opacity: 0.2; } 
+}
+
+/* Marquee Text Animation */
+@keyframes marqueeAnim { 
+    0% { transform: translateX(100vw); } 
+    100% { transform: translateX(-100%); } 
+}
+
+/* =======================================================
+   CUSTOM SCROLLBARS
+   ======================================================= */
+.custom-scrollbar::-webkit-scrollbar { 
+    height: 4px; 
+    width: 4px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-track { 
+    background: transparent; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb { 
+    background: var(--border-dark); 
+    border-radius: 10px; 
+}
+
+/* Khusus untuk area Chat Box */
+.chat-scroll::-webkit-scrollbar { 
+    width: 4px; 
+}
+
+.chat-scroll::-webkit-scrollbar-track { 
+    background: transparent; 
+}
+
+.chat-scroll::-webkit-scrollbar-thumb { 
+    background: var(--border-dark); 
+    border-radius: 10px; 
+}

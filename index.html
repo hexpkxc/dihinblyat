@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Hooligans TMA</title>
+    
+    <!-- SDK Telegram WebApp -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lottie Player -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    
+    <!-- MEMANGGIL FILE CSS EKSTERNAL (style.css) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-grad-body min-h-screen flex flex-col relative pb-24">
+
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="fixed inset-0 bg-[#000000] z-[9999] flex flex-col items-center justify-center transition-opacity duration-500">
+        <div id="splashIconCont" class="text-7xl mb-4 animate-pulse"><span id="splashIcon">🔥</span></div>
+        <h1 class="text-3xl font-bold text-glow-red mb-2 italic serif">Hooligans</h1>
+        <div class="flex items-center gap-3 mt-4">
+            <div class="w-5 h-5 border-2 border-theme border-t-[var(--fire-pri)] rounded-full animate-spin"></div>
+            <p class="text-theme-sub text-sm tracking-widest font-bold">Memuat Server...</p>
+        </div>
+    </div>
+
+    <!-- Animasi Latar Api -->
+    <div class="fire-particles"></div>
+
+    <!-- Peringatan Akses Desktop -->
+    <div id="mobileOnlyOverlay" class="fixed inset-0 bg-dark z-[9999] flex flex-col items-center justify-center text-center p-6 hidden">
+        <div class="text-6xl mb-4 anim-float text-glow-red">📱</div>
+        <h2 class="text-2xl font-bold text-glow-red mb-2">Akses Ditolak</h2>
+        <p class="text-theme-sub text-sm">WebApp ini hanya dirancang untuk Handphone.</p>
+    </div>
+
+    <!-- Header -->
+    <header class="p-4 shadow-lg rounded-b-2xl border-b border-theme relative z-10" style="background: linear-gradient(to bottom, var(--grad-1), transparent);">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div id="headerIconCont" class="w-10 h-10 rounded-full bg-black flex items-center justify-center border border-theme overflow-hidden anim-float shadow-[0_0_15px_var(--border-light)] flex-shrink-0">
+                    <span id="headerIcon" class="text-xl">🔥</span>
+                </div>
+                <div class="flex flex-col justify-center">
+                    <div class="flex items-center gap-1.5">
+                        <h1 class="text-xl font-bold text-glow-red italic serif leading-none">Hooligans</h1>
+                        <div id="slot1" class="empty:hidden flex-shrink-0 drop-shadow-md flex items-center justify-center"></div>
+                    </div>
+                    <p class="text-[10px] text-theme-sub font-bold uppercase tracking-widest mt-0.5 leading-none">Mabar & Store Center</p>
+                </div>
+            </div>
+            
+            <button onclick="openModal('notifModal'); loadNotif();" class="relative flex items-center justify-center w-10 h-10 rounded-full bg-black/50 border border-theme shadow-[0_0_15px_var(--border-light)] overflow-hidden flex-shrink-0 transition active:scale-90">
+                <span class="text-[18px]">🔔</span>
+                <span id="notifBadge" class="hidden absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-black animate-ping"></span>
+                <span id="notifBadgeDot" class="hidden absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-black"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Navigasi Tab Utama (Ditambahkan Tab Esports) -->
+    <div class="flex p-4 space-x-1 relative z-10 overflow-x-auto custom-scrollbar">
+        <button onclick="switchTab('profile')" id="btn-profile" class="flex-1 py-2.5 rounded-xl font-bold transition-all duration-300 tab-btn-active text-[10px] sm:text-[11px] border"><span id="icon-profile">👤</span> Profil</button>
+        <button onclick="switchTab('mabar')" id="btn-mabar" class="flex-1 py-2.5 rounded-xl font-bold transition-all duration-300 tab-btn-inactive text-[10px] sm:text-[11px] border"><span id="icon-mabar">🎮</span> Mabar</button>
+        <button onclick="switchTab('esports')" id="btn-esports" class="flex-1 py-2.5 rounded-xl font-bold transition-all duration-300 tab-btn-inactive text-[10px] sm:text-[11px] border"><span id="icon-esports">🏆</span> Esports</button>
+        <button onclick="switchTab('topup')" id="btn-topup" class="flex-1 py-2.5 rounded-xl font-bold transition-all duration-300 tab-btn-inactive text-[10px] sm:text-[11px] border"><span id="icon-toko">💎</span> Toko</button>
+        <button onclick="switchTab('pesan')" id="btn-pesan" class="flex-1 py-2.5 rounded-xl font-bold transition-all duration-300 tab-btn-inactive text-[10px] sm:text-[11px] border">💬 Pesan</button>
+    </div>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="flex-1 px-4 relative z-10">
+        
+        <!-- Marquee / Pengumuman -->
+        <div class="flex items-center gap-2 w-full py-1.5 px-3 mb-4 rounded-lg bg-[var(--panel-bg)] border border-theme shadow-[0_2px_15px_rgba(255,42,0,0.2)]">
+            <div id="slot2" class="empty:hidden flex-shrink-0 z-10 drop-shadow-md flex items-center justify-center"></div>
+            <div class="overflow-hidden whitespace-nowrap flex-1 relative">
+                <div class="inline-block animate-[marqueeAnim_15s_linear_infinite] text-[13px] font-bold text-glow-red tracking-wide" id="marqueeText">
+                    🔥 Memuat Pengumuman Server... 🔥
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 1: PROFIL ================= -->
+        <div id="profile" class="tab-content active space-y-4">
+            <div id="frame-saldo" class="bg-gradient-to-br from-[var(--grad-1)] to-[var(--grad-2)] p-5 rounded-2xl border border-theme shadow-[0_0_20px_var(--border-light)] relative overflow-hidden anim-float">
+                <div id="bg-img-saldo" class="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-overlay hidden z-0"></div>
+                <div class="absolute inset-0 bg-black/40 z-0 hidden" id="bg-overlay-saldo"></div> 
+                <div class="flex justify-between items-center mb-1 relative z-10">
+                    <p class="text-[10px] text-theme-sub font-bold tracking-widest">SALDO HOOLIGANS</p>
+                    <button onclick="refreshSaldo()" id="btnRefreshSaldo" class="bg-black/70 border border-theme text-white rounded-full w-8 h-8 flex items-center justify-center text-xs active:scale-90 transition shadow-lg"><span id="icon-refresh-saldo">↻</span></button>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-4 relative z-10 text-glow-red">Rp <span id="profSaldo">0</span></h2>
+                <div class="flex space-x-3 relative z-10 mb-3">
+                    <button onclick="openModal('depositModal')" class="flex-1 btn-blue py-2.5 rounded-lg text-sm flex items-center justify-center gap-1"><span id="icon-saldo">💳</span> Isi Saldo</button>
+                    <button onclick="openModal('donateModal')" class="flex-1 btn-fire py-2.5 rounded-lg text-sm flex items-center justify-center gap-1"><span id="icon-donate">🔥</span> Donate (VIP)</button>
+                </div>
+                <button onclick="loadHistory()" class="w-full relative z-10 bg-[var(--panel-bg)] text-theme-sub border border-theme py-2.5 rounded-lg font-bold text-sm active:scale-95 transition-all flex items-center justify-center gap-1"><span id="icon-history">📜</span> Riwayat Mutasi Saldo</button>
+            </div>
+
+            <div id="frame-profil" class="glass-panel p-5 rounded-2xl text-center mt-4 relative overflow-hidden">
+                <div id="bg-img-profil" class="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-overlay hidden z-0"></div>
+                <div class="absolute inset-0 bg-black/50 z-0 hidden" id="bg-overlay-profil"></div>
+                <div class="w-16 h-16 mx-auto mb-3 relative anim-float z-10">
+                    <div class="w-full h-full bg-black rounded-full border-2 border-[var(--blue-pri)] flex items-center justify-center text-2xl shadow-[0_0_20px_var(--blue-glow)] overflow-hidden relative">
+                        <span id="profEmoji">👤</span>
+                        <img id="profImg" src="" class="hidden w-full h-full object-cover">
+                    </div>
+                    <div id="badgeVip" class="hidden absolute -bottom-2 -right-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-black text-[9px] font-extrabold px-2 py-0.5 rounded-full border border-yellow-200 shadow-[0_0_15px_rgba(255,215,0,0.8)] z-10">VIP</div>
+                </div>
+                
+                <div class="flex items-center justify-center gap-2 mb-1 relative z-10 w-full px-2">
+                    <h2 id="profNick" class="text-xl font-bold text-glow-blue tracking-wide truncate max-w-[80%]">Memuat...</h2>
+                    <div id="slot5" class="empty:hidden flex-shrink-0 drop-shadow-md flex items-center justify-center"></div>
+                </div>
+
+                <div id="profRole" class="text-xs text-theme-sub mb-2 uppercase tracking-widest font-semibold relative z-10 flex items-center justify-center min-h-[28px]">-</div>
+                
+                <div class="inline-block bg-black/80 px-4 py-1.5 rounded-full text-xs text-yellow-400 border border-yellow-600 shadow-[0_0_10px_rgba(255,215,0,0.3)] font-bold relative z-10" id="profRating">0.0/5.0 ( Dari 0 Ulasan )</div>
+                <div class="mt-4 text-left space-y-2 border-t border-theme pt-3 relative z-10">
+                    <div class="flex justify-between text-sm"><span class="text-theme-sub font-semibold">Hero Fav:</span> <span id="profHero" class="font-bold text-white truncate w-1/2 text-right text-glow-red">-</span></div>
+                    <div class="flex justify-between text-sm"><span class="text-theme-sub font-semibold">Tgl Join:</span> <span id="profDate" class="font-bold text-white">-</span></div>
+                    <div class="flex justify-between text-sm"><span class="text-theme-sub font-semibold">Bio:</span> <span id="profBio" class="font-bold text-theme-sub text-right truncate w-2/3">-</span></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 mt-4">
+                <button onclick="openModal('leaderboardModal'); loadLeaderboard();" class="btn-fire py-3 rounded-xl text-sm flex items-center justify-center gap-1.5 shadow-[0_0_15px_var(--border-light)]"><span id="icon-rank">🏆</span> LIHAT LEADERBOARD</button>
+                <div class="flex gap-2">
+                    <button onclick="openModal('editProfileModal')" class="flex-1 bg-[var(--panel-bg)] text-theme-sub py-3 rounded-xl text-xs border border-theme active:scale-95 transition-all font-bold flex items-center justify-center gap-1"><span id="icon-edit-profil">✏️</span> EDIT PROFIL</button>
+                    <button onclick="syncPhoto()" class="flex-1 btn-blue py-3 rounded-xl text-xs flex items-center justify-center gap-1"><span id="icon-sync-ktp">↻</span> SINKRON KTP</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: MABAR ================= -->
+        <div id="mabar" class="tab-content space-y-4">
+            <div class="flex space-x-1.5 bg-[var(--panel-bg)] p-1.5 rounded-xl border border-theme shadow-[0_0_20px_var(--border-light)] mb-4 overflow-x-auto custom-scrollbar">
+                <button onclick="setMabarCat('buat')" id="btnCatMabarBuat" class="flex-1 min-w-[55px] py-2.5 rounded-lg bg-[var(--border-dark)] text-white text-[11px] font-bold transition border border-[var(--fire-pri)] shadow-[0_0_10px_var(--border-light)] px-1">Buat</button>
+                <button onclick="setMabarCat('aktif')" id="btnCatMabarAktif" class="flex-1 min-w-[70px] py-2.5 rounded-lg text-theme-sub bg-transparent text-[11px] font-bold transition border border-transparent px-1">Room Aktif</button>
+                <button onclick="setMabarCat('chat')" id="btnCatMabarChat" class="flex-1 min-w-[70px] py-2.5 rounded-lg text-theme-sub bg-transparent text-[11px] font-bold transition border border-transparent px-1">Room Chat</button>
+                <button onclick="setMabarCat('vip')" id="btnCatMabarVip" class="flex-1 min-w-[60px] py-2.5 rounded-lg text-theme-sub bg-transparent text-[11px] font-bold transition border border-transparent px-1">Host VIP</button>
+                <button onclick="setMabarCat('rating')" id="btnCatMabarRating" class="flex-1 min-w-[55px] py-2.5 rounded-lg text-theme-sub bg-transparent text-[11px] font-bold transition border border-transparent px-1">Rating</button>
+            </div>
+
+            <!-- Mabar: Buat Room -->
+            <div id="mabar-buat">
+                <div id="mabarFormContainer" class="glass-panel p-5 rounded-2xl relative overflow-hidden">
+                    <h2 class="text-xl font-bold text-glow-red mb-4">🔥 Buat Room Mabar</h2>
+                    
+                    <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1 mt-2">Tipe Permainan</label>
+                    <select id="rType" class="w-full bg-black/50 border border-theme rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[var(--fire-pri)] transition">
+                        <option>Ranked</option><option>Classic</option><option>Brawl</option><option>Custom</option>
+                    </select>
+                    
+                    <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Minimal Rank</label>
+                    <select id="rRank" class="w-full bg-black/50 border border-theme rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[var(--fire-pri)] transition">
+                        <option>Semua Rank</option><option>GM</option><option>Epic</option><option>Legend</option><option>Mythic</option><option>Honor</option><option>Glory</option><option>Immortal</option>
+                    </select>
+                    
+                    <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Batas Waktu (Expired)</label>
+                    <select id="rExp" class="w-full bg-black/50 border border-theme rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[var(--fire-pri)] transition">
+                        <option value="10">10 Menit</option>
+                        <option value="15">15 Menit</option>
+                        <option value="30" selected>30 Menit</option>
+                        <option value="60">60 Menit</option>
+                        <option value="90">90 Menit</option>
+                        <option value="120">120 Menit</option>
+                    </select>
+                    
+                    <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Role Yang Dibutuhkan</label>
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <label><input type="checkbox" class="role-checkbox hidden" value="Jungle"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Jungle</div></label>
+                        <label><input type="checkbox" class="role-checkbox hidden" value="Roam"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Roam</div></label>
+                        <label><input type="checkbox" class="role-checkbox hidden" value="Gold"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Gold</div></label>
+                        <label><input type="checkbox" class="role-checkbox hidden" value="Exp"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Exp</div></label>
+                        <label><input type="checkbox" class="role-checkbox hidden" value="Mid"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Mid</div></label>
+                    </div>
+                    
+                    <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Catatan Tambahan</label>
+                    <input type="text" id="rNote" placeholder="Catatan (Opsional)" class="w-full bg-black/50 border border-theme rounded-xl px-4 py-3 text-white mb-5 outline-none focus:border-[var(--fire-pri)] transition">
+                    
+                    <button id="btnCreateRoom" onclick="createRoom()" class="w-full btn-fire py-3.5 rounded-xl text-sm tracking-wide">PUBLISH ROOM LOBBY</button>
+                </div>
+
+                <div id="mabarActiveContainer" class="hidden glass-panel p-6 rounded-2xl relative overflow-hidden border-l-4 border-l-[var(--fire-pri)] shadow-[0_0_20px_var(--border-light)]">
+                    <div class="flex justify-between items-start mb-2">
+                        <h2 class="text-xl font-bold text-glow-red">🎮 Lobby Aktif</h2>
+                        <span class="animate-pulse text-[10px] bg-[var(--fire-pri)] text-white px-2 py-0.5 rounded-full font-bold">LIVE</span>
+                    </div>
+                    <p id="actRoomStatusText" class="text-[11px] text-theme-sub mb-4">Silakan setujui pelamar di bawah ini...</p>
+                    
+                    <div class="bg-black/70 p-4 rounded-xl border border-theme mb-5 shadow-inner">
+                        <div class="flex justify-between mb-2"><span class="text-theme-sub text-xs">Tipe/Rank:</span> <span id="actRoomType" class="font-bold text-white text-sm">-</span></div>
+                        <div class="flex justify-between"><span class="text-theme-sub text-xs">Dibutuhkan:</span> <span id="actRoomRoles" class="font-bold text-glow-blue text-sm">-</span></div>
+                    </div>
+                    
+                    <div id="hostOnlySection">
+                        <div id="hostRoomControls" class="flex gap-2 mb-4">
+                            <button onclick="openEditRoomModal()" class="flex-1 bg-gray-800 text-white border border-gray-600 py-2.5 rounded-lg text-xs font-bold active:scale-95 shadow-md flex items-center justify-center gap-1 transition">✏️ EDIT ROOM</button>
+                            <button onclick="processCancelRoom()" class="flex-1 bg-red-900/50 text-red-400 border border-red-500 py-2.5 rounded-lg text-xs font-bold active:scale-95 shadow-md flex items-center justify-center gap-1 transition">❌ BATALKAN</button>
+                        </div>
+
+                        <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-1.5 border-b border-theme pb-2">👥 Daftar Pelamar <span id="hostReqCount" class="bg-[var(--fire-pri)] text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span></h3>
+                        <div id="hostRequestsContainer" class="mt-3 space-y-3 mb-5 max-h-[300px] overflow-y-auto custom-scrollbar">
+                            <p class="text-center text-[10px] text-theme-sub py-3">Menunggu pelamar masuk...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mabar: Daftar Room Live Server -->
+            <div id="mabar-aktif" class="hidden space-y-3">
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-xs text-theme-sub font-bold">Daftar Room Live Server</p>
+                    <button onclick="loadRooms()" class="bg-black/80 border border-theme px-3 py-1 rounded text-xs text-white shadow-sm active:scale-90 transition inline-flex items-center gap-1"><span id="icon-refresh-mabar">↻</span> Segarkan</button>
+                </div>
+                <div id="listRoomAktif" class="space-y-3"></div>
+            </div>
+
+            <!-- Mabar: Room Chat -->
+            <div id="mabar-chat" class="hidden flex-col h-[65vh]">
+                <div id="roomChatOverlay" class="flex-1 flex flex-col items-center justify-center text-center bg-black/80 rounded-xl border border-theme p-5">
+                    <span class="text-5xl mb-3 drop-shadow-md">🎮</span>
+                    <h3 class="text-lg font-bold text-glow-red mb-2">Room Chat Terkunci</h3>
+                    <p class="text-xs text-theme-sub leading-relaxed">Anda belum bergabung di Room Mabar manapun.<br>Silakan buat room atau gabung dari tab Mabar.</p>
+                </div>
+
+                <div id="roomChatActive" class="hidden flex-col h-full">
+                    <div class="bg-red-900/30 border border-red-800 p-3 rounded-xl mb-3 flex flex-col">
+                        <div class="flex justify-between items-center mb-1">
+                            <div>
+                                <p class="text-[11px] font-bold text-red-200">Lobby Mabar Aktif</p>
+                                <p class="text-[10px] text-red-300/70">Bagikan ID Room MLBB Anda di sini kepada member lain.</p>
+                            </div>
+                        </div>
+                        <div class="border-t border-red-800/50 pt-2 mt-1">
+                            <p class="text-[10px] font-bold text-red-200 mb-1.5 flex items-center gap-1">👥 Anggota Room:</p>
+                            <div id="roomMemberList" class="flex flex-col gap-1.5 max-h-24 overflow-y-auto custom-scrollbar">
+                                <p class="text-[10px] text-red-300/50 italic">Memuat anggota...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="chatMessagesRoom" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-3 bg-black/50 rounded-xl border border-theme mb-3 shadow-inner"></div>
+                    
+                    <div class="flex items-center gap-2 mb-3">
+                        <input type="text" id="chatInputRoom" placeholder="Ketik ke Party..." class="flex-1 bg-[var(--panel-bg)] border border-theme h-12 px-4 rounded-xl text-sm outline-none text-white focus:border-[var(--fire-pri)] transition shadow-inner">
+                        <button id="btnSendRoomChat" onclick="sendRoomChat()" class="btn-fire h-12 px-5 rounded-xl font-bold shadow-[0_0_15px_var(--border-light)]">Kirim</button>
+                    </div>
+
+                    <div id="roomChatControls" class="flex gap-2">
+                        <button id="btnStartMatch" onclick="tg.showConfirm('Mulai mabar sekarang? Room akan disembunyikan dari publik.', function(r){ if(r) startMatch(); })" class="flex-1 btn-blue py-3.5 rounded-xl text-xs font-bold tracking-wide active:scale-95 transition hidden shadow-[0_0_15px_var(--blue-glow)]">🎮 MULAI MABAR</button>
+                        <button id="btnLeaveEarly" onclick="tg.showConfirm('Yakin ingin keluar sebelum mabar dimulai? Anda tidak perlu memberi rating.', function(r){ if(r) leaveEarly(); })" class="flex-1 bg-red-900/50 border border-red-500 text-red-300 hover:text-white py-3.5 rounded-xl text-xs font-bold tracking-wide active:scale-95 transition hidden">🚪 KELUAR ROOM</button>
+                    </div>
+                    <button id="btnFinishMatch" onclick="tg.showConfirm('Mabar sudah selesai? Anda akan keluar dari room dan memberikan rating ke anggota party.', function(r){ if(r) finishMatch(); })" class="w-full bg-[var(--border-dark)] border border-[var(--fire-pri)] text-white py-3.5 rounded-xl text-sm font-bold tracking-wide active:scale-95 transition hidden mt-2 shadow-[0_0_15px_var(--border-light)]">✅ SELESAI MABAR (RATING)</button>
+                </div>
+            </div>
+
+            <!-- Mabar: Daftar Host VIP -->
+            <div id="mabar-vip" class="hidden space-y-4">
+                <button onclick="openModal('applyVipModal')" class="w-full btn-fire py-3 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--border-light)] mb-1 flex items-center justify-center gap-2"><span>💎</span> DAFTAR JADI HOST VIP</button>
+                <div id="listVipPlayers" class="space-y-3"></div>
+            </div>
+
+            <!-- Mabar: Rating Pending -->
+            <div id="mabar-rating" class="hidden space-y-3">
+                <div class="bg-yellow-900/20 border-l-4 border-l-yellow-500 p-3 rounded-xl shadow-inner mb-3">
+                    <p class="text-[11px] text-yellow-200/90 leading-relaxed">Berikan rating kepada rekan tim Anda setelah mabar selesai. Rating di bawah 4 Bintang <b>WAJIB</b> menyertakan bukti screenshot permainan.</p>
+                </div>
+                <div id="listPendingRatings" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: ESPORTS (SQUAD & TURNAMEN) ================= -->
+        <div id="esports" class="tab-content space-y-4 hidden">
+            <!-- Navigasi Sub-Tab Esports -->
+            <div class="flex space-x-1.5 bg-[var(--panel-bg)] p-1.5 rounded-xl border border-theme shadow-[0_0_20px_var(--border-light)] mb-4 overflow-x-auto custom-scrollbar">
+                <button onclick="setEsportsCat('squad')" id="btnCatSquad" class="flex-1 min-w-[70px] py-2.5 rounded-lg bg-[var(--border-dark)] text-white text-[11px] font-bold transition border border-[var(--fire-pri)] shadow-[0_0_10px_var(--border-light)] px-1">🛡️ Squad</button>
+                <button onclick="setEsportsCat('tour')" id="btnCatTour" class="flex-1 min-w-[70px] py-2.5 rounded-lg text-theme-sub bg-transparent text-[11px] font-bold transition border border-transparent px-1">🏆 Turnamen</button>
+            </div>
+
+            <!-- Bagian: SQUAD -->
+            <div id="esports-squad">
+                <!-- Jika User Belum Punya Squad -->
+                <div id="squadNotJoinedContainer" class="space-y-4">
+                    <div class="glass-panel p-5 rounded-2xl relative overflow-hidden">
+                        <h2 class="text-xl font-bold text-glow-blue mb-4 flex items-center gap-2">🛡️ Buat Squad Baru</h2>
+                        <input type="text" id="sqName" placeholder="Nama Squad (Max 20 Karakter)" maxlength="20" class="w-full bg-black/50 border border-theme rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner">
+                        <input type="text" id="sqTag" placeholder="Singkatan / Tag (Max 4)" maxlength="4" class="w-full bg-black/50 border border-theme rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner uppercase">
+                        <input type="url" id="sqLogo" placeholder="URL Logo Squad (Opsional, https://...)" class="w-full bg-black/50 border border-theme rounded-xl px-4 py-3 text-white mb-4 outline-none focus:border-[var(--blue-pri)] transition shadow-inner text-[11px]">
+                        <button onclick="createSquad()" class="w-full btn-blue py-3.5 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--blue-glow)]">BENTUK SQUAD</button>
+                    </div>
+                    
+                    <div class="text-center font-bold text-theme-sub text-[10px] tracking-widest relative">
+                        <span class="bg-black/90 px-3 relative z-10">ATAU</span>
+                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-theme"></div></div>
+                    </div>
+                    
+                    <div class="glass-panel p-5 rounded-2xl relative overflow-hidden">
+                        <h2 class="text-xl font-bold text-glow-red mb-4 flex items-center gap-2">🤝 Gabung Squad</h2>
+                        <input type="text" id="sqJoinId" placeholder="Masukkan ID Squad (Contoh: SQD-1234)" class="w-full bg-black/50 border border-theme rounded-xl px-4 py-3.5 text-white mb-4 outline-none focus:border-[var(--fire-pri)] transition uppercase text-center font-bold tracking-widest shadow-inner">
+                        <button onclick="joinSquad()" class="w-full btn-fire py-3.5 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--border-light)]">CARI & GABUNG</button>
+                    </div>
+                </div>
+
+                <!-- Jika User Sudah Punya Squad (Aktif/Pending) -->
+                <div id="squadActiveContainer" class="hidden space-y-4">
+                    <div class="glass-panel p-5 rounded-2xl relative overflow-hidden border-t-4 border-t-[var(--blue-pri)] shadow-inner">
+                        <div class="flex items-center gap-4 mb-4 pb-4 border-b border-theme">
+                            <img id="mySqLogo" src="template_default.png" class="w-16 h-16 rounded-xl border-2 border-[var(--blue-pri)] object-cover shadow-[0_0_10px_var(--blue-glow)]">
+                            <div>
+                                <h2 id="mySqName" class="text-xl font-bold text-white leading-tight">Nama Squad</h2>
+                                <p id="mySqTag" class="text-xs text-glow-blue font-bold mt-0.5">[TAG]</p>
+                                <div class="bg-[var(--border-dark)] px-2 py-1 rounded-md inline-block mt-2 border border-theme cursor-pointer active:scale-95 transition" onclick="copySquadId()">
+                                    <p class="text-[9px] text-gray-300">ID: <span id="mySqId" class="font-mono text-white font-bold tracking-wider">SQD-0000</span> 📋</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chat Internal Squad (Basecamp) -->
+                        <div class="bg-black/60 rounded-xl border border-theme p-3 mb-4 shadow-inner">
+                            <div class="flex justify-between items-center mb-2 pb-2 border-b border-gray-800">
+                                <h3 class="text-[11px] font-bold text-glow-blue flex items-center gap-1.5">💬 Basecamp Tim</h3>
+                                <span class="animate-pulse w-2 h-2 bg-green-500 rounded-full"></span>
+                            </div>
+                            <div id="chatMessagesSquad" class="overflow-y-auto chat-scroll space-y-2 h-40 mb-3 pr-1"></div>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="chatInputSquad" placeholder="Ketik pesan..." class="flex-1 bg-[var(--panel-bg)] border border-theme h-10 px-3 rounded-lg text-xs outline-none text-white focus:border-[var(--blue-pri)] transition shadow-inner">
+                                <button onclick="sendSquadChat()" class="btn-blue h-10 px-4 rounded-lg text-xs font-bold shadow-[0_0_10px_var(--blue-glow)]">Kirim</button>
+                            </div>
+                        </div>
+
+                        <!-- Daftar Anggota -->
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-xs font-bold text-white">👥 Daftar Anggota</h3>
+                            <span id="mySqCount" class="text-[10px] bg-[var(--fire-pri)] px-2 py-0.5 rounded-full text-white font-bold border border-red-400">1/10</span>
+                        </div>
+                        <div id="mySquadMembers" class="space-y-2 mb-4 max-h-48 overflow-y-auto custom-scrollbar p-1"></div>
+                        
+                        <!-- Panel Khusus Leader (ACC/Tolak) -->
+                        <div id="squadLeaderControls" class="hidden mt-4 pt-4 border-t border-theme">
+                            <h3 class="text-xs font-bold text-yellow-400 mb-2 flex items-center gap-1.5">📥 Menunggu Persetujuan <span id="sqPendingBadge" class="bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">0</span></h3>
+                            <div id="mySquadPending" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar mb-4"></div>
+                        </div>
+
+                        <button onclick="tg.showConfirm('Yakin ingin keluar dari Squad? Jika Anda Leader, squad akan bubar permanen.', function(r){ if(r) leaveSquad(); })" class="w-full bg-red-900/50 border border-red-500 text-red-300 py-3 rounded-xl text-xs font-bold active:scale-95 transition mt-2">🚪 KELUAR SQUAD</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bagian: TURNAMEN -->
+            <div id="esports-tour" class="hidden space-y-4">
+                
+                <!-- Panel Admin Khusus Owner -->
+                <div id="adminTourPanel" class="hidden glass-panel p-5 rounded-2xl relative overflow-hidden border-l-4 border-l-[var(--fire-pri)] mb-4 bg-red-900/10 shadow-inner">
+                    <h2 class="text-sm font-bold text-glow-red mb-3 flex items-center gap-2">👑 Owner Control: Buat Turnamen</h2>
+                    <input type="text" id="cTourName" placeholder="Nama Turnamen (Misal: Hooligans Cup #1)" class="w-full bg-black/50 border border-theme rounded-lg px-3 py-2.5 text-white mb-3 outline-none focus:border-[var(--fire-pri)] text-xs shadow-inner">
+                    <div class="flex gap-2 mb-3">
+                        <div class="flex-1">
+                            <label class="text-[9px] text-theme-sub font-bold block mb-1">Format</label>
+                            <select id="cTourFormat" class="w-full bg-black/50 border border-theme rounded-lg px-2 py-2.5 text-white outline-none text-xs"><option value="1">BO1 (Sistem Gugur)</option><option value="3">BO3</option></select>
+                        </div>
+                        <div class="w-1/3">
+                            <label class="text-[9px] text-theme-sub font-bold block mb-1">Slot Tim</label>
+                            <select id="cTourSlots" class="w-full bg-black/50 border border-theme rounded-lg px-2 py-2.5 text-white outline-none text-xs"><option value="8">8 Tim</option><option value="16">16 Tim</option></select>
+                        </div>
+                    </div>
+                    <label class="text-[9px] text-theme-sub font-bold block mb-1">Biaya Daftar / Tim (Potong Saldo Leader)</label>
+                    <input type="number" id="cTourFee" placeholder="Contoh: 20000 (Isi 0 jika Gratis)" class="w-full bg-black/50 border border-theme rounded-lg px-3 py-2.5 text-white mb-4 outline-none focus:border-[var(--fire-pri)] text-xs shadow-inner">
+                    <button onclick="createTournament()" class="w-full btn-fire py-2.5 rounded-lg text-xs font-bold shadow-[0_0_10px_var(--border-light)]">PUBLISH TURNAMEN SEKARANG</button>
+                </div>
+
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-xs text-theme-sub font-bold">Daftar Turnamen Hooligans</p>
+                    <button onclick="loadTournaments()" class="bg-black/80 border border-theme px-3 py-1.5 rounded-lg text-[10px] font-bold text-white shadow-sm active:scale-90 transition inline-flex items-center gap-1.5"><span id="icon-refresh-tour">↻</span> Refresh</button>
+                </div>
+                
+                <!-- Daftar Turnamen Aktif -->
+                <div id="listTournaments" class="space-y-3 pb-5">
+                    <p class="text-center text-[11px] text-theme-sub py-5">Memuat data turnamen...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: TOKO ================= -->
+        <div id="topup" class="tab-content space-y-4">
+            <div class="flex space-x-2 bg-[var(--panel-bg)] p-1.5 rounded-xl border border-theme shadow-[0_0_20px_var(--border-light)]">
+                <button onclick="setTopupCat('game')" id="btnCatGame" class="flex-1 py-2.5 rounded-lg bg-[var(--border-dark)] text-white text-xs font-bold transition border border-[var(--fire-pri)] shadow-[0_0_10px_var(--border-light)] flex items-center justify-center gap-1.5"><span id="icon-cat-game">🎮</span> Game Top Up</button>
+                <button onclick="setTopupCat('sosmed')" id="btnCatSosmed" class="flex-1 py-2.5 rounded-lg text-theme-sub bg-transparent text-xs font-bold transition border border-transparent flex items-center justify-center gap-1.5"><span id="icon-cat-sosmed">📱</span> Sosial Media</button>
+            </div>
+
+            <!-- Game Top Up -->
+            <div id="sectionGame" class="space-y-4">
+                <div class="glass-panel p-4 rounded-2xl flex space-x-3">
+                    <div class="flex-1"><label class="block text-[10px] text-theme-sub font-bold mb-1">GAME</label><select id="gameSelector" onchange="filterGameItems()" class="w-full bg-[var(--panel-bg)] border border-theme rounded-lg px-2 py-2 text-sm outline-none"><option value="MLBB">Mobile Legends</option><option value="PUBG">PUBG Mobile</option><option value="WHITEOUT">Whiteout Survival</option></select></div>
+                    <div class="flex-1"><label class="block text-[10px] text-theme-sub font-bold mb-1">REGION</label><select id="regionSelector" onchange="filterGameItems()" class="w-full bg-[var(--panel-bg)] border border-theme rounded-lg px-2 py-2 text-sm outline-none"><option value="GLOBAL_INDO">Global / Indo</option><option value="BRAZIL">Brazil</option><option value="SINGAPORE">Singapore</option><option value="RUSSIA">Russia</option><option value="PHILIPPINES">Philippines</option><option value="MALAYSIA">Malaysia</option></select></div>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <h2 class="text-sm font-bold text-glow-blue mb-3 flex items-center gap-1.5"><span id="icon-data-akun">⚡</span> Data Akun</h2>
+                    <div class="flex space-x-2">
+                        <input type="number" id="gameId" placeholder="User ID" class="w-2/3 bg-[var(--panel-bg)] border border-theme rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--blue-pri)] transition">
+                        <input type="text" id="gameZone" placeholder="(Zone)" class="w-1/3 bg-[var(--panel-bg)] border border-theme rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--blue-pri)] transition">
+                    </div>
+                    <button onclick="checkGameAccount()" id="btnCheckGame" class="w-full mt-3 btn-blue py-2.5 rounded-lg text-xs">🔍 CEK NICKNAME</button>
+                    <div id="gameNicknameResult" class="hidden"></div>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-sm font-bold text-glow-red flex items-center gap-1.5"><span id="icon-pilih-nominal">🔥</span> Pilih Nominal</h2>
+                        <button onclick="refreshPricelistUI()" class="text-[10px] bg-black/50 border border-theme px-2.5 py-1.5 rounded shadow-sm active:scale-90 transition"><span id="icon-refresh-game" class="inline-block">↻</span></button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3" id="gameListContainer"></div>
+                </div>
+            </div>
+
+            <!-- Sosmed (SMM) -->
+            <div id="sectionSosmed" class="space-y-4 hidden">
+                <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-yellow-500 bg-yellow-900/20">
+                    <h3 class="text-yellow-400 font-bold text-sm mb-1 flex items-center gap-1.5"><span id="icon-warning">⚠️</span> WARNING!</h3>
+                    <p class="text-xs text-yellow-200/80">Sosmed memiliki resiko Drop. Pesanan tidak bisa dibatalkan.</p>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl"><select id="sosmedPlatform" onchange="filterSosmedItems()" class="w-full bg-[var(--panel-bg)] border border-theme rounded-lg px-2 py-2 text-sm outline-none"><option value="TELEGRAM">Telegram</option><option value="TIKTOK">TikTok</option></select></div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <input type="url" id="sosmedLink" oninput="calcSosmedPrice()" placeholder="Link Target (URL)" class="w-full bg-[var(--panel-bg)] border border-theme rounded-lg px-3 py-2 text-sm outline-none mb-3 focus:border-[var(--blue-pri)] transition">
+                    <div class="relative">
+                        <input type="number" id="sosmedQty" oninput="calcSosmedPrice()" placeholder="Jumlah (Quantity)" class="w-full bg-[var(--panel-bg)] border border-theme rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--blue-pri)] transition">
+                        <div id="sosmedMinText" class="absolute right-3 top-2.5 text-[10px] text-gray-500 font-bold">Min: 0</div>
+                    </div>
+                    <div class="mt-3 flex items-start space-x-2"><input type="checkbox" id="sosmedAgr" onchange="calcSosmedPrice()" class="mt-1 w-4 h-4 accent-[var(--fire-pri)]"><label class="text-[10px] text-theme-sub">Saya paham resiko SMM dan link yang saya masukkan sudah benar.</label></div>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-sm font-bold text-glow-blue flex items-center gap-1.5"><span id="icon-layanan-sosmed">🔥</span> Layanan</h2>
+                        <button onclick="refreshPricelistUI()" class="text-[10px] bg-black/50 border border-theme px-2.5 py-1.5 rounded shadow-sm active:scale-90 transition"><span id="icon-refresh-sosmed" class="inline-block">↻</span></button>
+                    </div>
+                    <div class="grid grid-cols-1 gap-2.5" id="sosmedListContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: PESAN ================= -->
+        <div id="pesan" class="tab-content space-y-4">
+            <div class="flex space-x-1.5 bg-[var(--panel-bg)] p-1.5 rounded-xl border border-theme shadow-[0_0_20px_var(--border-light)] mb-2 overflow-x-auto custom-scrollbar">
+                <button onclick="setPesanCat('cs')" id="btnCatPesanCs" class="flex-1 py-2 rounded-lg bg-[var(--border-dark)] text-white text-[11px] font-bold transition border border-[var(--blue-pri)] shadow-[0_0_10px_var(--blue-glow)] whitespace-nowrap px-3">🎧 CS</button>
+                <button onclick="setPesanCat('vip')" id="btnCatPesanVip" class="flex-1 py-2 rounded-lg text-theme-sub bg-transparent text-[11px] font-bold transition border border-transparent whitespace-nowrap px-3">💎 VIP Chat</button>
+            </div>
+
+            <!-- Pesan: CS -->
+            <div id="pesan-cs" class="flex flex-col h-[65vh]">
+                <div class="bg-blue-900/30 border border-blue-800 p-3 rounded-xl mb-3">
+                    <p class="text-[10px] text-blue-200">Kirimkan pesan, laporan, atau pertanyaan langsung kepada Developer di sini. (Deposit & Laporan Media via menu Form).</p>
+                </div>
+                
+                <div id="chatMessagesCs" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-3 bg-black/50 rounded-xl border border-theme mb-3 shadow-inner"></div>
+                
+                <div class="flex items-center gap-2">
+                    <input type="text" id="chatInputCs" placeholder="Ketik pesan..." class="flex-1 bg-[var(--panel-bg)] border border-theme h-12 px-4 rounded-xl text-sm outline-none text-white focus:border-[var(--blue-pri)] transition shadow-inner">
+                    <button id="btnSendCsChat" onclick="sendCsChat()" class="btn-blue h-12 px-5 rounded-xl font-bold shadow-[0_0_15px_var(--blue-glow)]">Kirim</button>
+                </div>
+            </div>
+
+            <!-- Pesan: VIP & Escrow -->
+            <div id="pesan-vip" class="hidden flex-col h-[65vh]">
+                <div id="vipContactList" class="flex-1 overflow-y-auto custom-scrollbar space-y-3 pb-5">
+                    <p class="text-center text-xs py-5 text-theme-sub">Memuat data VIP...</p>
+                </div>
+                
+                <div id="vipChatInterface" class="hidden flex-col h-full">
+                    <div class="flex items-center gap-3 mb-3 bg-black/80 p-2.5 rounded-xl border border-theme shadow-md">
+                        <button onclick="closeVipChat()" class="px-3 py-1.5 bg-[var(--border-dark)] rounded-lg font-bold text-white active:scale-90 transition">🔙</button>
+                        <div class="flex items-center gap-2 flex-1 overflow-hidden">
+                            <img id="vipChatTargetImg" src="template_default.png" class="w-8 h-8 rounded-full border border-yellow-500 object-cover flex-shrink-0" onerror="this.onerror=null;this.src='template_default.png';">
+                            <div>
+                                <h3 id="vipChatTargetName" class="font-bold text-sm text-glow-blue truncate leading-none">Nama Target</h3>
+                                <p class="text-[9px] text-yellow-400 font-bold mt-0.5">VIP Room</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="vipOrderBanner" class="hidden"></div>
+                    
+                    <div id="chatMessagesVip" class="flex-1 overflow-y-auto chat-scroll space-y-3 p-3 bg-black/50 rounded-xl border border-theme mb-3 shadow-inner"></div>
+                    
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="chatInputVip" placeholder="Ketik DM..." class="flex-1 bg-[var(--panel-bg)] border border-theme h-12 px-4 rounded-xl text-sm outline-none text-white focus:border-[var(--blue-pri)] transition shadow-inner">
+                        <button id="btnSendVipChat" onclick="sendVipChat()" class="btn-blue h-12 px-5 rounded-xl font-bold shadow-[0_0_15px_var(--blue-glow)]">Kirim</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Tombol Float Checkout Utama -->
+    <div id="mainButtonContainer" class="fixed bottom-0 left-0 w-full p-4 bg-black/95 backdrop-blur-md hidden border-t border-theme z-30 shadow-[0_-10px_30px_var(--border-light)]">
+        <div class="flex justify-between items-center mb-2 px-1"><span class="text-gray-300 text-xs font-semibold">Total:</span><span id="displayPrice" class="font-bold text-glow-red text-xl">Rp 0</span></div>
+        <button id="tgMainButton" class="w-full btn-fire py-3.5 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed" onclick="processMainCheckout()">PILIH ITEM DULU</button>
+    </div>
+
+    <!-- =======================================================
+         BLOK MODAL / POPUPS
+         ======================================================= -->
+
+    <div id="txLoadingModal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col items-center justify-center px-4"><div class="bg-[var(--panel-bg)] border border-theme p-6 rounded-2xl text-center w-full max-w-sm shadow-[0_0_30px_var(--border-light)]"><div class="w-16 h-16 border-4 border-theme border-t-[var(--fire-pri)] rounded-full animate-spin mx-auto mb-4"></div><h2 class="text-lg font-bold text-glow-red mb-2">Memproses...</h2><p class="text-xs text-theme-sub">Jangan tutup aplikasi.</p></div></div>
+    
+    <div id="txResultModal" class="fixed inset-0 bg-black/95 z-[100] hidden flex-col items-center justify-center px-4 modal-slide">
+        <div class="bg-[var(--panel-bg)] border border-theme p-6 rounded-2xl text-center w-full max-w-sm relative shadow-[0_0_30px_var(--border-light)]">
+            <div id="txResIcon" class="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 bg-black border-2 border-[var(--fire-pri)] shadow-[0_0_15px_var(--border-light)]">✅</div>
+            <h2 id="txResTitle" class="text-xl font-bold mb-1 text-glow-red">Judul</h2>
+            <p id="txResDesc" class="text-sm text-theme-sub mb-4">Desc</p>
+            <div class="bg-black/60 p-3 rounded-xl border border-theme text-left space-y-2 mb-6 text-xs shadow-inner">
+                <div class="flex justify-between"><span class="text-theme-sub">Item:</span><span id="txItem" class="text-white font-bold w-1/2 text-right truncate">-</span></div>
+                <div class="flex justify-between"><span class="text-theme-sub">INV:</span><span id="txInv" class="text-white font-mono">-</span></div>
+                <div class="flex justify-between"><span class="text-theme-sub">SN:</span><span id="txSn" class="text-[var(--blue-pri)] font-mono truncate w-1/2 text-right">-</span></div>
+            </div>
+            <button onclick="closeModal('txResultModal')" class="w-full btn-fire py-3 rounded-xl text-sm">TUTUP</button>
+        </div>
+    </div>
+    
+    <div id="historyModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-10 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-red">📜 Mutasi</h2>
+            <button onclick="closeModal('historyModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <div id="historyListContainer" class="space-y-3 pb-8"></div>
+    </div>
+    
+    <div id="depositModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-10 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-blue">💳 Isi Saldo</h2>
+            <button onclick="closeModal('depositModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        
+        <div class="bg-black/60 border border-theme p-3 rounded-xl mb-4 shadow-inner">
+            <p class="text-[11px] font-bold text-glow-blue mb-1">Jam Operasional Admin:</p>
+            <ul class="text-[10px] text-gray-300 space-y-1">
+                <li>• 10.00 - 18.00 WIB (Fast Respon 1-10 menit)</li>
+                <li>• 18.00 - 21.00 WIB (Slow Respon 30-60 menit)</li>
+                <li>• 21.00 - 00.00 WIB (Medium Respon 5-20 menit)</li>
+            </ul>
+        </div>
+
+        <div class="bg-yellow-900/20 border-l-4 border-l-yellow-500 p-4 rounded-xl mb-4 shadow-inner">
+            <h3 class="text-yellow-400 font-bold text-sm mb-2 flex items-center gap-1.5"><span id="icon-warning-depo">⚠️</span> PERHATIAN!</h3>
+            <ul class="text-xs text-yellow-200/80 list-disc pl-4 space-y-1.5">
+                <li class="font-bold text-white">Saldo yang sudah di deposit tidak bisa di tarik! Top up saldo sesuai kebutuhan anda!</li>
+                <li>Transfer <b class="text-white">WAJIB</b> sesuai nominal hingga 3 digit terakhir.</li>
+            </ul>
+        </div>
+
+        <div class="bg-black/60 border border-theme p-4 rounded-xl mb-4 text-center shadow-inner">
+            <h3 class="text-sm font-bold text-glow-blue mb-3">Scan QRIS Pembayaran</h3>
+            <img src="qris_hooligans.png" alt="QRIS Hooligans" class="w-48 h-48 mx-auto rounded-lg border-2 border-white shadow-[0_0_15px_var(--border-light)] mb-3 object-contain bg-white">
+            <p class="text-[10px] text-theme-sub mb-3 leading-relaxed">Screenshot layar ini atau Download QRIS di bawah. Buka aplikasi DANA/GoPay/M-Banking Anda, pilih menu Scan, lalu pilih gambar QRIS dari Galeri HP Anda.</p>
+            <button onclick="downloadQRIS()" class="inline-flex items-center gap-1.5 bg-[var(--border-dark)] border border-theme text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md active:scale-95 transition">
+                <span>⬇️</span> Download QRIS
+            </button>
+        </div>
+
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Transfer Atas Nama Siapa? (Wajib)</label>
+        <input type="text" id="depoSenderName" placeholder="Contoh: Budi Susanto" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner">
+
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Metode Pembayaran (Wajib)</label>
+        <select id="depoMethod" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner text-sm">
+            <option value="QRIS">QRIS All Payment</option>
+            <option value="Dana/Gopay">DANA / GOPAY Manual</option>
+            <option value="Bank Jago">BANK JAGO Manual</option>
+        </select>
+
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Nominal Top Up (Min 10.000)</label>
+        <input type="number" id="depoAmount" oninput="generateUniqueCode()" placeholder="Contoh: 15000" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-2 outline-none focus:border-[var(--blue-pri)] transition shadow-inner">
+        
+        <div id="depoTotalDisplayContainer" class="hidden bg-blue-900/20 border-l-4 border-l-[var(--blue-pri)] p-3 rounded-xl mb-4 shadow-inner">
+            <p class="text-[10px] text-blue-200 mb-1 font-bold">Transfer TEPAT sesuai nominal berikut:</p>
+            <h3 class="text-2xl font-bold text-white tracking-wider" id="depoTotalTransferText">Rp 0</h3>
+            <p class="text-[9px] text-blue-300/70 mt-1">*Sudah termasuk kode unik untuk verifikasi otomatis.</p>
+        </div>
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Upload Bukti Transfer (Bisa > 1 Foto)</label>
+        <div class="flex items-center gap-2 mb-6">
+            <input type="file" id="depoFile" class="hidden" accept="image/*" multiple onchange="document.getElementById('depoFileLabel').innerText = this.files.length + ' Gambar Dipilih'; document.getElementById('depoFileLabel').classList.add('text-green-400')">
+            <button onclick="document.getElementById('depoFile').click()" class="bg-black/50 border border-theme px-4 py-3.5 rounded-xl text-xs w-full text-left flex justify-between items-center shadow-inner"><span id="depoFileLabel" class="font-bold text-theme-sub">Pilih File Bukti...</span> <span class="text-xl">📸</span></button>
+        </div>
+        
+        <button id="btnSubmitDepo" onclick="submitDeposit()" class="w-full btn-blue py-3.5 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--blue-glow)]">KIRIM BUKTI DEPOSIT</button>
+    </div>
+    
+    <div id="donateModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-10 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-red">🔥 Donasi VIP</h2>
+            <button onclick="closeModal('donateModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <div class="bg-black/60 border border-theme p-4 rounded-xl mb-4 text-center shadow-inner relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-[var(--border-dark)] to-transparent opacity-20"></div>
+            <p class="text-xs text-theme-sub mb-2 relative z-10">Donasi anda sangat berguna untuk pengembangan server dan sistem kami!</p>
+            <p class="text-xs text-yellow-400 font-bold relative z-10">Jangan lupa titip pesan untuk admin ya!</p>
+        </div>
+        <input type="number" id="donAmount" placeholder="Memuat..." class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-3 outline-none focus:border-[var(--fire-pri)] transition shadow-inner">
+        <textarea id="donMsg" rows="3" placeholder="Pesan untuk Channel & Owner..." class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-5 outline-none focus:border-[var(--fire-pri)] transition shadow-inner"></textarea>
+        <button id="btnSubmitDonasi" onclick="processDonate()" class="w-full btn-fire py-3.5 rounded-xl text-sm shadow-[0_0_15px_var(--border-light)]">KIRIM (POTONG SALDO)</button>
+    </div>
+    
+    <div id="editProfileModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-20 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-blue">✏️ Edit Profil</h2>
+            <button onclick="closeModal('editProfileModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Nickname (Max 25)</label>
+        <input type="text" id="eNick" placeholder="Nickname In-game" maxlength="25" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition">
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Role Utama</label>
+        <select id="eRole" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition">
+            <option value="J">Jungle</option><option value="R">Roam</option><option value="G">Gold</option><option value="E">Exp</option><option value="M">Mid</option>
+        </select>
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Hero Favorit (Max 32)</label>
+        <input type="text" id="eHero" placeholder="Contoh: Fanny, Lancelot" maxlength="32" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition">
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Bio / Motto (Max 80)</label>
+        <input type="text" id="eBio" placeholder="Motto Mabar" maxlength="80" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition">
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Custom Photo Avatar (URL Opsional)</label>
+        <input type="url" id="ePhotoUrl" placeholder="https://imgur.com/... (Harus link gambar)" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-5 outline-none focus:border-[var(--blue-pri)] transition text-[13px]">
+        
+        <button id="btnSaveProfile" onclick="saveProfile()" class="w-full btn-fire py-3.5 rounded-xl text-sm shadow-[0_0_15px_var(--border-light)]">SIMPAN PERUBAHAN</button>
+    </div>
+
+    <!-- Edit Room Modal -->
+    <div id="editRoomModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-20 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-red">✏️ Edit Room Lobby</h2>
+            <button onclick="closeModal('editRoomModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Minimal Rank Baru</label>
+        <select id="eRoomRank" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[var(--fire-pri)] transition">
+            <option>Semua Rank</option><option>GM</option><option>Epic</option><option>Legend</option><option>Mythic</option><option>Honor</option><option>Glory</option><option>Immortal</option>
+        </select>
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Update Role Dibutuhkan</label>
+        <div class="grid grid-cols-3 gap-2 mb-3">
+            <label><input type="checkbox" class="edit-role-checkbox hidden" value="Jungle"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Jungle</div></label>
+            <label><input type="checkbox" class="edit-role-checkbox hidden" value="Roam"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Roam</div></label>
+            <label><input type="checkbox" class="edit-role-checkbox hidden" value="Gold"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Gold</div></label>
+            <label><input type="checkbox" class="edit-role-checkbox hidden" value="Exp"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Exp</div></label>
+            <label><input type="checkbox" class="edit-role-checkbox hidden" value="Mid"><div class="bg-black/50 border border-theme text-center py-2 rounded text-sm font-semibold cursor-pointer">Mid</div></label>
+        </div>
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Catatan</label>
+        <input type="text" id="eRoomNote" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-white mb-5 outline-none focus:border-[var(--fire-pri)] transition">
+        
+        <button onclick="submitEditRoom()" class="w-full btn-fire py-3.5 rounded-xl text-sm font-bold tracking-wide">SIMPAN PERUBAHAN</button>
+    </div>
+
+    <div id="leaderboardModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-10 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-red">🏆 Leaderboard</h2>
+            <button onclick="closeModal('leaderboardModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <div class="flex justify-end mb-2">
+            <button onclick="refreshLeaderboardUI(this)" class="bg-black/70 border border-theme px-3 py-1.5 rounded-lg text-xs text-white shadow-sm active:scale-90 transition inline-flex items-center gap-1.5"><span id="icon-refresh-rank-modal">↻</span> Refresh</button>
+        </div>
+        <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-[var(--fire-pri)] mb-4"><h2 class="text-sm font-bold text-glow-red mb-3 flex items-center gap-1.5">👑 Top 10 Sultan</h2><div id="listTopDonators" class="space-y-2"></div></div>
+        <div class="glass-panel p-4 rounded-2xl border-l-4 border-l-[var(--blue-pri)]"><h2 class="text-sm font-bold text-glow-blue mb-3 flex items-center gap-1.5">⭐ Top 10 Rating</h2><div id="listTopRatings" class="space-y-2"></div></div>
+    </div>
+
+    <div id="applyVipModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-20 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-blue">💎 Daftar Host VIP</h2>
+            <button onclick="closeModal('applyVipModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+
+        <div class="bg-black/60 border border-theme p-3 rounded-xl mb-3 shadow-inner">
+            <p class="text-[11px] font-bold text-glow-blue mb-1">Jam Operasional Admin:</p>
+            <ul class="text-[10px] text-gray-300 space-y-1">
+                <li>• 10.00 - 18.00 WIB (Fast Respon 1-10 menit)</li>
+                <li>• 18.00 - 21.00 WIB (Slow Respon 30-60 menit)</li>
+                <li>• 21.00 - 00.00 WIB (Medium Respon 5-20 menit)</li>
+            </ul>
+        </div>
+
+        <div class="bg-blue-900/20 border-l-4 border-l-blue-500 p-3 rounded-xl mb-4 shadow-inner">
+            <p class="text-xs text-blue-200">Isi form ini untuk mendaftar sebagai Host VIP Berbayar. Akun dan Stat Anda akan ditinjau secara manual.</p>
+        </div>
+        <input type="text" id="vipNick" placeholder="Nickname MLBB" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-sm text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner">
+        <input type="text" id="vipHero" placeholder="Hero Favorit / Sign" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-sm text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner">
+        <input type="text" id="vipRank" placeholder="Highest Rank" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-sm text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner">
+        <input type="number" id="vipPrice" placeholder="Harga Jasa (Per Match)" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-sm text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner">
+        <textarea id="vipMsg" rows="2" placeholder="Pesan / Promosi Singkat" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-sm text-white mb-3 outline-none focus:border-[var(--blue-pri)] transition shadow-inner"></textarea>
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Screenshot Profile / Stat MLBB (Wajib)</label>
+        <div class="flex items-center gap-2 mb-6">
+            <input type="file" id="vipFile" class="hidden" accept="image/*" onchange="document.getElementById('vipFileLabel').innerText = '✅ Gambar Dipilih'; document.getElementById('vipFileLabel').classList.add('text-green-400')">
+            <button onclick="document.getElementById('vipFile').click()" class="bg-black/50 border border-theme px-4 py-3.5 rounded-xl text-xs w-full text-left flex justify-between items-center shadow-inner"><span id="vipFileLabel" class="font-bold">Pilih File...</span> <span class="text-xl">📸</span></button>
+        </div>
+
+        <button id="btnSubmitVip" onclick="submitVipApp()" class="w-full btn-blue py-3.5 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--blue-glow)]">KIRIM LAMARAN</button>
+    </div>
+
+    <!-- VIP Profile Modal -->
+    <div id="vipProfileModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-10 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-blue">💎 Profil VIP</h2>
+            <button onclick="closeModal('vipProfileModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <div class="glass-panel p-5 rounded-2xl text-center relative overflow-hidden mb-4 border-t-4 border-t-yellow-500 shadow-inner">
+            <img id="vProfImg" src="template_default.png" class="w-20 h-20 mx-auto rounded-full border-2 border-yellow-500 object-cover shadow-[0_0_15px_rgba(255,215,0,0.6)] mb-3">
+            <h2 id="vProfNick" class="text-xl font-bold text-white mb-1">Host VIP</h2>
+            <div class="inline-block bg-yellow-600/20 px-3 py-1 rounded-full text-xs text-yellow-400 border border-yellow-500 mb-2 font-bold" id="vProfRating">⭐ 5.0/5.0 ( Dari 0 Ulasan )</div>
+            <p id="vProfStats" class="text-xs text-theme-sub mb-3">Hero Fav: - | Rank: -</p>
+            <div class="bg-black/60 p-2 rounded-lg border border-gray-700">
+                <p class="text-[10px] text-gray-400">Tarif Mabar</p>
+                <p id="vProfTariff" class="text-sm font-bold text-green-400">Rp 0 / Match</p>
+            </div>
+        </div>
+        <h3 class="text-sm font-bold text-glow-blue mb-3 border-b border-theme pb-2">💬 Testimoni Pelanggan</h3>
+        <div id="vipReviewsContainer" class="space-y-3 pb-5">
+            <!-- Diisi melalui app.js -->
+        </div>
+    </div>
+
+    <!-- VIP Rate Modal -->
+    <div id="vipRateModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-20 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-red">⭐ Testimoni VIP</h2>
+            <button onclick="closeModal('vipRateModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <div class="text-center mb-5">
+            <p class="text-sm text-theme-sub">Beri ulasan layanan untuk:</p>
+            <h3 id="vipRateName" class="text-2xl font-bold text-white mt-1">Host VIP</h3>
+        </div>
+        
+        <div class="flex justify-center space-x-2 mb-6" id="vipStarSelector">
+            <button onclick="setVipScore(1)" class="vip-star-btn bg-black/80 border border-[var(--fire-pri)] text-[var(--fire-pri)] w-12 h-12 rounded-lg text-lg active:bg-[var(--fire-pri)] transition font-bold shadow-[0_0_10px_var(--fire-pri)]">1⭐</button>
+            <button onclick="setVipScore(2)" class="vip-star-btn bg-black/80 border border-[var(--fire-pri)] text-[var(--fire-pri)] w-12 h-12 rounded-lg text-lg active:bg-[var(--fire-pri)] transition font-bold shadow-[0_0_10px_var(--fire-pri)]">2⭐</button>
+            <button onclick="setVipScore(3)" class="vip-star-btn bg-black/80 border border-[var(--fire-pri)] text-[var(--fire-pri)] w-12 h-12 rounded-lg text-lg active:bg-[var(--fire-pri)] transition font-bold shadow-[0_0_10px_var(--fire-pri)]">3⭐</button>
+            <button onclick="setVipScore(4)" class="vip-star-btn bg-black/80 border border-[var(--fire-pri)] text-[var(--fire-pri)] w-12 h-12 rounded-lg text-lg active:bg-[var(--fire-pri)] transition font-bold shadow-[0_0_10px_var(--fire-pri)]">4⭐</button>
+            <button onclick="setVipScore(5)" class="vip-star-btn bg-black/80 border border-[var(--fire-pri)] text-[var(--fire-pri)] w-12 h-12 rounded-lg text-lg active:bg-[var(--fire-pri)] transition font-bold shadow-[0_0_10px_var(--fire-pri)]">5⭐</button>
+        </div>
+        <input type="hidden" id="vipRateScore" value="5">
+
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Komentar / Ulasan Anda</label>
+        <textarea id="vipRateComment" rows="4" placeholder="Tuliskan pengalaman mabar dengan Host ini..." class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-white mb-5 outline-none focus:border-[var(--blue-pri)] transition shadow-inner"></textarea>
+
+        <button id="btnSubmitVipRating" onclick="submitVipRating()" class="w-full btn-blue py-3.5 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--blue-glow)]">KIRIM TESTIMONI</button>
+    </div>
+
+    <!-- Rate Modal -->
+    <div id="rateModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-20 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-red">⭐ Ulasan Player</h2>
+            <button onclick="closeModal('rateModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+
+        <div class="bg-black/60 border border-theme p-3 rounded-xl mb-4 shadow-inner">
+            <p class="text-[11px] font-bold text-glow-red mb-1">Jam Operasional Admin:</p>
+            <ul class="text-[10px] text-gray-300 space-y-1">
+                <li>• 10.00 - 18.00 WIB (Fast Respon 1-10 menit)</li>
+                <li>• 18.00 - 21.00 WIB (Slow Respon 30-60 menit)</li>
+                <li>• 21.00 - 00.00 WIB (Medium Respon 5-20 menit)</li>
+            </ul>
+        </div>
+
+        <div class="text-center mb-6">
+            <p class="text-sm text-theme-sub">Beri nilai performa untuk:</p>
+            <h3 id="rateName" class="text-2xl font-bold text-white mt-1">Player</h3>
+            <p id="rateScoreDisplay" class="text-xl text-glow-red font-bold mt-2">5 Bintang</p>
+        </div>
+
+        <div id="rateEvidenceSection" class="hidden mb-6 bg-red-900/20 border border-red-800 p-4 rounded-xl shadow-inner">
+            <p class="text-[11px] text-red-200 mb-3 font-bold">⚠️ Anda memberikan rating buruk! WAJIB melampirkan screenshot atau video pendek sebagai bukti performa buruk/trolling.</p>
+            <input type="file" id="rateFile" class="hidden" accept="image/*,video/*" onchange="document.getElementById('rateFileLabel').innerText = '✅ Bukti Dipilih'; document.getElementById('rateFileLabel').classList.add('text-green-400')">
+            <button onclick="document.getElementById('rateFile').click()" class="bg-black/80 border border-red-500 px-4 py-3 rounded-xl text-xs w-full text-left flex justify-between items-center"><span id="rateFileLabel" class="text-red-400 font-bold">Pilih File Bukti...</span> <span class="text-xl">📸</span></button>
+        </div>
+
+        <button id="btnSubmitRating" onclick="submitRating()" class="w-full btn-fire py-3.5 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--border-light)]">KIRIM ULASAN</button>
+    </div>
+
+    <!-- Order VIP Modal -->
+    <div id="orderVipModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-20 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-blue">🛒 Order Jasa VIP</h2>
+            <button onclick="closeModal('orderVipModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <p class="text-sm text-theme-sub mb-4">Pesan jasa mabar dari <b id="orderVipHostName" class="text-white">Host</b></p>
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Berapa Match?</label>
+        <input type="number" id="orderMatchCount" value="1" min="1" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-5 outline-none focus:border-[var(--blue-pri)] transition shadow-inner">
+        
+        <button id="btnSubmitVipOrder" onclick="submitVipOrder()" class="w-full btn-blue py-3.5 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--blue-glow)]">BAYAR SEKARANG</button>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="wdModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-20 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-red">💸 Tarik Pendapatan</h2>
+            <button onclick="closeModal('wdModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        
+        <div class="bg-yellow-900/20 border-l-4 border-l-yellow-500 p-3 rounded-xl mb-4 shadow-inner">
+            <p class="text-[11px] text-yellow-200/90 leading-relaxed"><b>Syarat & Ketentuan WD:</b><br>Minimal Penarikan: Rp 10.000. Biaya transfer bank/e-wallet selain Bank Jago & GoPay akan otomatis dipotong dari total penarikan Anda oleh Admin.</p>
+        </div>
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Nominal Penarikan (Rp)</label>
+        <input type="number" id="wdAmount" placeholder="Contoh: 50000" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3.5 text-white mb-3 outline-none focus:border-[var(--fire-pri)] transition shadow-inner">
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">Metode Pencairan</label>
+        <select id="wdMethod" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-white mb-3 outline-none focus:border-[var(--fire-pri)] transition shadow-inner text-sm">
+            <option value="Bank Jago">BANK JAGO (Gratis)</option>
+            <option value="Gopay">GOPAY (Gratis)</option>
+            <option value="Dana">DANA</option>
+            <option value="Ovo">OVO</option>
+            <option value="Shopeepay">SHOPEEPAY</option>
+            <option value="BCA">BCA</option>
+            <option value="Mandiri">MANDIRI</option>
+            <option value="BRI">BRI</option>
+        </select>
+        
+        <label class="block text-[10px] text-theme-sub font-bold mb-1 ml-1">No. Rekening / No. HP & Atas Nama</label>
+        <textarea id="wdAccount" rows="2" placeholder="Contoh: 08123456789 a.n Budi Susanto" class="w-full bg-[var(--panel-bg)] border border-theme rounded-xl px-4 py-3 text-sm text-white mb-5 outline-none focus:border-[var(--fire-pri)] transition shadow-inner"></textarea>
+        
+        <button id="btnSubmitWd" onclick="submitWithdraw()" class="w-full btn-fire py-3.5 rounded-xl text-sm font-bold shadow-[0_0_15px_var(--border-light)]">TARIK SEKARANG</button>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notifModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-10 pt-5 px-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 sticky top-0 bg-black/95 py-3 z-10 border-b border-theme">
+            <h2 class="text-xl font-bold text-glow-red">🔔 Pemberitahuan</h2>
+            <button onclick="closeModal('notifModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition">&times;</button>
+        </div>
+        <div id="listNotifikasi" class="space-y-3 pb-5"></div>
+    </div>
+
+    <!-- UPDATE BARU: BAGAN TURNAMEN MODAL (DOUBLE ELIMINATION HYBRID) -->
+    <div id="bracketModal" class="fixed inset-0 bg-black/95 z-50 hidden modal-slide flex-col pb-10 pt-5 px-0 overflow-y-auto">
+        <div class="flex justify-between items-center mb-2 sticky top-0 bg-black/95 py-3 px-4 z-20 border-b border-theme shadow-md">
+            <div>
+                <h2 id="bracketTourName" class="text-lg font-bold text-glow-red leading-tight">Nama Turnamen</h2>
+                <p id="bracketTourStatus" class="text-[10px] text-theme-sub">Status: Memuat Bagan...</p>
+            </div>
+            <button onclick="closeModal('bracketModal')" class="text-[var(--fire-pri)] text-3xl active:scale-90 transition px-2">&times;</button>
+        </div>
+        
+        <!-- Action Buttons Khusus Owner untuk Trigger Bracket Hibrida -->
+        <div id="ownerBracketControls" class="px-4 mb-4 hidden">
+            <button onclick="generateBracket()" class="w-full btn-fire py-2.5 rounded-lg text-xs font-bold shadow-[0_0_10px_var(--border-light)] mb-2">🎲 ACAK & MULAI BRACKET (8 TIM) SEKARANG</button>
+        </div>
+
+        <div class="px-4 mb-2">
+            <p class="text-[9px] text-gray-400">Gunakan jari untuk menggeser (swipe) bagan turnamen ke kanan atau ke bawah.</p>
+        </div>
+        
+        <!-- Arena Menggambar Bracket Hibrida (Horizontal Scroll) -->
+        <div class="overflow-x-auto w-full pb-10 custom-scrollbar px-4 relative">
+            <div id="bracketDrawArea" class="min-w-max inline-flex gap-8 items-start py-4 bg-black/40 rounded-xl p-4 border border-theme">
+                <!-- Javascript App.js akan merender kotak-kotak struktur secara dinamis di sini -->
+                <p class="text-xs text-theme-sub italic">Belum ada bagan pertandingan yang dibuat.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPDATE BARU: MATCH REPORT MODAL (KHUSUS OWNER UNTUK ACC SKOR) -->
+    <div id="matchReportModal" class="fixed inset-0 bg-black/95 z-[60] hidden modal-slide flex-col items-center justify-center px-4">
+        <div class="bg-[var(--panel-bg)] border border-theme p-6 rounded-2xl w-full max-w-sm shadow-[0_0_30px_var(--border-light)]">
+            <h2 class="text-lg font-bold text-glow-blue mb-1">⚖️ ACC Kemenangan Tim</h2>
+            <p id="reportMatchName" class="text-[10px] text-theme-sub mb-4">Quarter Final 1</p>
+            
+            <p class="text-xs text-center text-white font-bold mb-3">Pilih Tim Pemenang:</p>
+            
+            <div class="flex flex-col gap-3">
+                <button id="btnWinSq1" onclick="" class="btn-blue py-3 rounded-xl text-sm font-bold shadow-[0_0_10px_var(--blue-glow)] truncate px-2">Tim A</button>
+                <div class="text-center text-[10px] font-bold text-gray-500">VS</div>
+                <button id="btnWinSq2" onclick="" class="btn-fire py-3 rounded-xl text-sm font-bold shadow-[0_0_10px_var(--border-light)] truncate px-2">Tim B</button>
+            </div>
+            
+            <button onclick="closeModal('matchReportModal')" class="w-full bg-black border border-gray-600 text-gray-400 py-3 rounded-xl text-xs font-bold mt-5 active:scale-95 transition">BATAL</button>
+        </div>
+    </div>
+
+    <!-- MEMANGGIL FILE JAVASCRIPT EKSTERNAL (app.js) -->
+    <script src="app.js"></script>
+</body>
+</html>
