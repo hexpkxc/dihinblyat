@@ -44,10 +44,61 @@ const roleMapEmoji = {
     'Gold': '5253696437048350963', 'Exp': '5253799546328226827'
 };
 
+// =======================================================
+// NGROK MEDIA INTERCEPTOR (BYPASS ANTI-PHISHING NGROK)
+// Secara otomatis mengubah request <img src="ngrok..."> menjadi Fetch Blob
+// =======================================================
+const processNgrokMedia = async (el) => {
+    const src = el.getAttribute('src');
+    if (src && src.startsWith(API_BASE_URL) && !el.dataset.ngrokProcessed) {
+        el.dataset.ngrokProcessed = "true"; // Tandai agar tidak loop
+        
+        try {
+            const res = await fetch(src, { 
+                headers: { 'ngrok-skip-browser-warning': 'true', 'Authorization': tg.initData || '' } 
+            });
+            if (res.ok) {
+                const blob = await res.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                if (el.tagName === 'LOTTIE-PLAYER') el.setAttribute('src', objectUrl);
+                else el.src = objectUrl;
+            } else {
+                if (el.tagName === 'IMG') el.src = 'template_default.png'; // Fallback
+            }
+        } catch (e) {
+            if (el.tagName === 'IMG') el.src = 'template_default.png';
+        }
+    }
+};
+
+const mediaObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === 1) { // Jika itu sebuah Element
+                    if (['IMG', 'VIDEO', 'LOTTIE-PLAYER'].includes(node.tagName)) processNgrokMedia(node);
+                    if (node.querySelectorAll) node.querySelectorAll('img, video, lottie-player').forEach(processNgrokMedia);
+                }
+            });
+        } else if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+            processNgrokMedia(mutation.target);
+        }
+    });
+});
+
+mediaObserver.observe(document.documentElement, {
+    childList: true, subtree: true, attributes: true, attributeFilter: ['src']
+});
+// =======================================================
+
 window.onload = async () => {
     if (!['android', 'android_x', 'ios'].includes(tg.platform) && tg.platform !== "unknown") {
         return document.getElementById('mobileOnlyOverlay').classList.remove('hidden');
     }
+    
+    // Jalankan observer untuk image yang sudah ada di HTML sejak awal
+    document.querySelectorAll('img, video, lottie-player').forEach(processNgrokMedia);
+
     if (tgUser) {
         await Promise.all([
             loadAppearance().catch(e=>console.error(e)), 
@@ -73,12 +124,13 @@ const renderMediaTag = (url, cls) => {
     const inlineStyle = 'background:transparent; display:inline-block; vertical-align:middle; max-width:100%; max-height:100%; pointer-events:none;';
     if (lowerUrl.endsWith('.webm') || lowerUrl.endsWith('.mp4')) return `<video autoplay loop muted playsinline src="${url}" class="${cls}" style="${inlineStyle} object-fit:contain;"></video>`;
     else if (lowerUrl.endsWith('.json') || lowerUrl.endsWith('.tgs')) return `<lottie-player autoplay loop mode="normal" src="${url}" class="${cls}" style="${inlineStyle}"></lottie-player>`;
-    else return `<img src="${url}" class="${cls}" loading="lazy" style="${inlineStyle} object-fit:contain;">`;
+    else return `<img src="${url}" class="${cls}" loading="lazy" style="${inlineStyle} object-fit:contain;" onerror="this.onerror=null;this.src='template_default.png';">`;
 };
 
+// TELAH DI UPDATE: Mendukung file asset relative/lokal dari Github
 const setImgIcon = (id, url, cls) => { 
     const el = document.getElementById(id); 
-    if(el && url && (url.startsWith('http') || url.startsWith('/api/'))) {
+    if(el && url) {
         const finalUrl = url.startsWith('/api/') ? API_BASE_URL + url : url;
         el.innerHTML = renderMediaTag(finalUrl, cls); 
     }
@@ -86,7 +138,7 @@ const setImgIcon = (id, url, cls) => {
 const setSlotIcon = (id, url, cls) => { 
     const el = document.getElementById(id); 
     if(el) { 
-        if(url && (url.startsWith('http') || url.startsWith('/api/'))) {
+        if(url) {
             const finalUrl = url.startsWith('/api/') ? API_BASE_URL + url : url;
             el.innerHTML = renderMediaTag(finalUrl, cls); 
         }
