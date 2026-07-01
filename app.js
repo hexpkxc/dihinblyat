@@ -3,7 +3,7 @@
 // Mengatur seluruh logika UI, Interaksi API, dan State
 // =======================================================
 
-const API_BASE_URL = "https://probiotic-duckling-eastward.ngrok-free.dev";
+const API_BASE_URL = "stony-repacking-occupant.ngrok-free.dev";
 
 // --- 1. UTILITIES & MODALS ---
 function openModal(id) { 
